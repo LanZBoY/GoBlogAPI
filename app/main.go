@@ -1,17 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"wentee/blog/app/appinit"
 	"wentee/blog/app/config"
+	"wentee/blog/app/di"
+	"wentee/blog/app/routes"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	router := appinit.NewRouter()
 	appCtx := setupCtx()
-	fmt.Printf("%v\n", appCtx)
+	container := di.InitContainer(appCtx)
+	router := routes.SetupRouter(container)
+
 	router.Run(":8080")
 
 }
