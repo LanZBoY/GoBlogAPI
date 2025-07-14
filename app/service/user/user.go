@@ -27,10 +27,8 @@ func NewUserService(userRepo *UserRepo.UserRepo) *UserService {
 
 func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 
-	if user, err := svc.userRepo.GetUserByUserName(createUser.Username); user != nil {
+	if user, _ := svc.userRepo.GetUserByUserName(createUser.Username); user != nil {
 		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, errcode.Message(errcode.USER_EXIST), nil)
-	} else if err != nil {
-		return apperror.New(http.StatusInternalServerError, "Unknown", err.Error(), err)
 	}
 
 	salt, err := utils.GenerateSalt(32)

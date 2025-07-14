@@ -21,48 +21,45 @@ func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter {
 	}
 }
 
-func (api *UserRouter) CreateUser(c *gin.Context) error {
+func (api *UserRouter) CreateUser(c *gin.Context) {
 	var userCreate UserSchema.UserCreate
 
 	if err := c.ShouldBindBodyWithJSON(&userCreate); err != nil {
-		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, errcode.Message(errcode.USER_EXIST), err)
+		c.Error(apperror.New(http.StatusBadRequest, errcode.USER_EXIST, errcode.Message(errcode.USER_EXIST), err))
+		return
 	}
 	if err := api.userService.RegistryUser(&userCreate); err != nil {
-		return err
+		c.Error(err)
+		return
 	}
-	return nil
 }
 
-func (api *UserRouter) GetUser(c *gin.Context) error {
+func (api *UserRouter) GetUser(c *gin.Context) {
 	id := c.Param("id")
 	userData, err := api.userService.GetUserById(id)
 
 	if err != nil {
-		return err
+		c.Error(err)
 	}
 	c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})
-	return nil
+
 }
 
-func (api *UserRouter) ListUsers(c *gin.Context) error {
+func (api *UserRouter) ListUsers(c *gin.Context) {
 
 	var baseQuery basemodel.BaseQuery
 
 	if err := c.ShouldBindQuery(&baseQuery); err != nil {
-		return err
+		c.Error(err)
+		return
 	}
 
 	api.userService.ListUsers(&baseQuery)
 
-	return nil
 }
 
-func (api *UserRouter) UpdateUser(c *gin.Context) error {
-
-	return nil
+func (api *UserRouter) UpdateUser(c *gin.Context) {
 }
 
-func (api *UserRouter) DeleteUser(c *gin.Context) error {
-
-	return nil
+func (api *UserRouter) DeleteUser(c *gin.Context) {
 }

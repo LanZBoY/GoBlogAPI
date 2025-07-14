@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"net/http"
 	"wentee/blog/app/schema/apperror"
 
 	"github.com/gin-gonic/gin"
@@ -10,17 +9,17 @@ import (
 
 type HandlerFuncWithError func(c *gin.Context) error
 
-func ErrorHandlerWrapper(handlerFunc HandlerFuncWithError) gin.HandlerFunc {
+func ErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := handlerFunc(c); err != nil {
-			var appError *apperror.AppError
+		c.Next() // Run This Before
 
+		if len(c.Errors) > 0 {
+			err := c.Errors.Last().Err
+			var appError *apperror.AppError
 			if errors.As(err, &appError) {
-				c.JSON(appError.Status, gin.H{"code": appError.Code, "message": appError.Message})
+				c.JSON(appError.Status, gin.H{"Code": appError.Code, "Message": appError.GetMessage()})
 				return
 			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 		}
-
 	}
 }
