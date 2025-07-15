@@ -21,10 +21,14 @@ func HashPassword(password string, salt string) (string, error) {
 	salted := password + salt
 	hashBytes, err := bcrypt.GenerateFromPassword([]byte(salted), bcrypt.DefaultCost)
 
-	return hex.EncodeToString(hashBytes), err
+	return string(hashBytes), err
 }
 
 func VerifyPassword(hashedPassword string, password string, salt string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password+salt))
-	return err == nil
+	salted := password + salt
+
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(salted)); err != nil {
+		return false
+	}
+	return true
 }

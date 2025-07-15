@@ -1,10 +1,12 @@
 package middleware
 
 import (
-	"errors"
+	"fmt"
+	"net/http"
 	"wentee/blog/app/schema/apperror"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type HandlerFuncWithError func(c *gin.Context) error
@@ -15,10 +17,20 @@ func ErrorHandler() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
-			var appError *apperror.AppError
-			if errors.As(err, &appError) {
-				c.JSON(appError.Status, gin.H{"Code": appError.Code, "Message": appError.GetMessage()})
-				return
+
+			switch e := err.(type) {
+			case apperror.AppError:
+				c.JSON(e.Status, gin.H{"Code": e.Code, "Message": e.GetMessage()})
+			case validator.ValidationErrors:
+				fieldErrs := make([]string, len(e))
+
+				for i, fieldErr := range e {
+					fieldErrs[i] = fmt.Sprintf("%v : %v", fieldErr.Field(), fieldErr.Tag())
+				}
+
+				c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": fieldErrs})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"Message": "Internal Server Error"})
 			}
 		}
 	}

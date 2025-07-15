@@ -25,10 +25,14 @@ func NewUserService(userRepo *UserRepo.UserRepo) *UserService {
 	}
 }
 
+func (svc *UserService) CountUsers() (total int64, err error) {
+	return svc.userRepo.CountUsers()
+}
+
 func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 
 	if user, _ := svc.userRepo.GetUserByUserName(createUser.Username); user != nil {
-		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, errcode.Message(errcode.USER_EXIST), nil)
+		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, nil)
 	}
 
 	salt, err := utils.GenerateSalt(32)
