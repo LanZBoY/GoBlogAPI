@@ -38,7 +38,7 @@ func (authSvc *AuthService) TryLogin(loginInfo *AuthSchema.LoginInfo) (tokenStri
 
 	claims := AuthSchema.JWTClaims{
 		UserInfo: AuthSchema.JWTUserInfo{
-			Id: userDoc.Id,
+			Id: userDoc.Id.Hex(),
 		},
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    config.SERVICE_NAME,

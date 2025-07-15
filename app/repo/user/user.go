@@ -4,6 +4,7 @@ import (
 	"context"
 	"wentee/blog/app/model/mongodb"
 	"wentee/blog/app/schema/basemodel"
+	UserSchema "wentee/blog/app/schema/user"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -60,4 +61,14 @@ func (repo *UserRepo) GetUserByUserName(username string, opts ...*options.FindOn
 		return nil, err
 	}
 	return &userDoc, nil
+}
+
+func (repo *UserRepo) UpdateUserById(id primitive.ObjectID, updateData UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
+	_, err = repo.userCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": updateData})
+	return
+}
+
+func (repo *UserRepo) DeleteUserById(id primitive.ObjectID, opts ...*options.DeleteOptions) (err error) {
+	_, err = repo.userCollection.DeleteOne(context.TODO(), bson.M{"_id": id}, opts...)
+	return
 }

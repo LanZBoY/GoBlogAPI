@@ -6,7 +6,7 @@ import (
 	"wentee/blog/app/schema/apperror"
 	"wentee/blog/app/schema/apperror/errcode"
 	AuthSchema "wentee/blog/app/schema/auth"
-	"wentee/blog/app/utils/context"
+	"wentee/blog/app/utils/reqcontext"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -25,7 +25,7 @@ func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		token, err := jwt.ParseWithClaims(tokenString, &AuthSchema.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &AuthSchema.JWTClaims{}, func(token *jwt.Token) (any, error) {
 
 			return []byte(config.JWT_SECRET), nil
 		})
@@ -42,7 +42,7 @@ func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(context.USER_INFO, claim.UserInfo)
+		c.Set(reqcontext.USER_INFO, claim.UserInfo)
 		c.Next()
 	}
 }

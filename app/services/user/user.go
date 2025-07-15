@@ -46,11 +46,13 @@ func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 		return err
 	}
 
-	svc.userRepo.CreateUser(&mongodb.UserDocument{
+	if err := svc.userRepo.CreateUser(&mongodb.UserDocument{
 		Username: createUser.Username,
 		Password: hashedPasswroed,
 		Salt:     salt,
-	})
+	}); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -82,10 +84,29 @@ func (svc *UserService) ListUsers(baseQuery *basemodel.BaseQuery) (users []UserS
 
 	for _, user_doc := range user_docs {
 		users = append(users, UserSchema.UserInfo{
+			Id:       user_doc.Id,
 			Username: user_doc.Username,
 		})
 	}
 
 	return
 
+}
+
+func (svc *UserService) UpdateUserById(id string, userUpdate UserSchema.UserUpdate) (err error) {
+	oId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return
+	}
+	err = svc.userRepo.UpdateUserById(oId, userUpdate)
+	return
+}
+
+func (svc *UserService) DeleteUserById(id string) (err error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return
+	}
+	err = svc.userRepo.DeleteUserById(oid)
+	return
 }

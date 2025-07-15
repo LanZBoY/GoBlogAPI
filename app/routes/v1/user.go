@@ -9,6 +9,7 @@ import (
 func RegistryUserRouter(rg *gin.RouterGroup, container *di.Container) {
 	rg.POST("", container.UserRouter.CreateUser)
 	rg.GET("", container.UserRouter.ListUsers)
+	rg.GET("/me", container.UserRouter.GetMe)
 
 	id_rg := rg.Group("/:id")
 	{
