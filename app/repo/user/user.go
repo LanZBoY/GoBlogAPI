@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"wentee/blog/app/model/mongodb"
+	UserModel "wentee/blog/app/model/mongodb/user"
 	"wentee/blog/app/schema/basemodel"
 	UserSchema "wentee/blog/app/schema/user"
 
@@ -26,13 +26,13 @@ func (repo *UserRepo) CountUsers() (int64, error) {
 	return repo.userCollection.CountDocuments(context.TODO(), bson.M{})
 }
 
-func (repo *UserRepo) CreateUser(createUser *mongodb.UserDocument) error {
+func (repo *UserRepo) CreateUser(createUser *UserModel.UserDocument) error {
 	_, err := repo.userCollection.InsertOne(context.TODO(), createUser)
 	return err
 }
 
-func (repo *UserRepo) QueryUsers(query *basemodel.BaseQuery) ([]mongodb.UserDocument, error) {
-	var userDocs []mongodb.UserDocument
+func (repo *UserRepo) QueryUsers(query *basemodel.BaseQuery) ([]UserModel.UserDocument, error) {
+	var userDocs []UserModel.UserDocument
 
 	cur, err := repo.userCollection.Find(context.TODO(), bson.M{}, options.Find().SetSkip(query.Skip).SetLimit(query.Limit))
 
@@ -47,28 +47,28 @@ func (repo *UserRepo) QueryUsers(query *basemodel.BaseQuery) ([]mongodb.UserDocu
 	return userDocs, nil
 }
 
-func (repo *UserRepo) GetUserById(id primitive.ObjectID, opts ...*options.FindOneOptions) (*mongodb.UserDocument, error) {
-	var userDoc mongodb.UserDocument
-	if err := repo.userCollection.FindOne(context.TODO(), bson.M{"_id": id}, opts...).Decode(&userDoc); err != nil {
+func (repo *UserRepo) GetUserById(id primitive.ObjectID, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
+	var userDoc UserModel.UserDocument
+	if err := repo.userCollection.FindOne(context.TODO(), bson.M{UserModel.FieldId: id}, opts...).Decode(&userDoc); err != nil {
 		return nil, err
 	}
 	return &userDoc, nil
 }
 
-func (repo *UserRepo) GetUserByUserName(username string, opts ...*options.FindOneOptions) (*mongodb.UserDocument, error) {
-	var userDoc mongodb.UserDocument
-	if err := repo.userCollection.FindOne(context.TODO(), bson.M{"Username": username}, opts...).Decode(&userDoc); err != nil {
+func (repo *UserRepo) GetUserByEmail(email string, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
+	var userDoc UserModel.UserDocument
+	if err := repo.userCollection.FindOne(context.TODO(), bson.M{UserModel.FieldEmail: email}, opts...).Decode(&userDoc); err != nil {
 		return nil, err
 	}
 	return &userDoc, nil
 }
 
 func (repo *UserRepo) UpdateUserById(id primitive.ObjectID, updateData UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
-	_, err = repo.userCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": updateData})
+	_, err = repo.userCollection.UpdateOne(context.TODO(), bson.M{UserModel.FieldId: id}, bson.M{"$set": updateData})
 	return
 }
 
 func (repo *UserRepo) DeleteUserById(id primitive.ObjectID, opts ...*options.DeleteOptions) (err error) {
-	_, err = repo.userCollection.DeleteOne(context.TODO(), bson.M{"_id": id}, opts...)
+	_, err = repo.userCollection.DeleteOne(context.TODO(), bson.M{UserModel.FieldId: id}, opts...)
 	return
 }

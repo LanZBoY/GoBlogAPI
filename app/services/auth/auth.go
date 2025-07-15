@@ -25,7 +25,7 @@ func NewAuthService(userRepo *UserRepo.UserRepo) *AuthService {
 
 func (authSvc *AuthService) TryLogin(loginInfo *AuthSchema.LoginInfo) (tokenString string, err error) {
 
-	userDoc, err := authSvc.userRepo.GetUserByUserName(loginInfo.Username)
+	userDoc, err := authSvc.userRepo.GetUserByEmail(loginInfo.Email)
 
 	if err != nil {
 		return

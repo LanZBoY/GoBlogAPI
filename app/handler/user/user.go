@@ -26,8 +26,8 @@ func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter {
 func (api *UserRouter) CreateUser(c *gin.Context) {
 	var userCreate UserSchema.UserCreate
 
-	if err := c.ShouldBindBodyWithJSON(&userCreate); err != nil {
-		c.Error(apperror.New(http.StatusBadRequest, errcode.USER_EXIST, err))
+	if err := c.ShouldBindJSON(&userCreate); err != nil {
+		c.Error(err)
 		return
 	}
 

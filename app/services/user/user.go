@@ -2,7 +2,7 @@ package user
 
 import (
 	"net/http"
-	"wentee/blog/app/model/mongodb"
+	UserModel "wentee/blog/app/model/mongodb/user"
 	UserRepo "wentee/blog/app/repo/user"
 	"wentee/blog/app/schema/apperror"
 	"wentee/blog/app/schema/apperror/errcode"
@@ -31,7 +31,7 @@ func (svc *UserService) CountUsers() (total int64, err error) {
 
 func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 
-	if user, _ := svc.userRepo.GetUserByUserName(createUser.Username); user != nil {
+	if user, _ := svc.userRepo.GetUserByEmail(createUser.Email); user != nil {
 		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, nil)
 	}
 
@@ -46,7 +46,8 @@ func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 		return err
 	}
 
-	if err := svc.userRepo.CreateUser(&mongodb.UserDocument{
+	if err := svc.userRepo.CreateUser(&UserModel.UserDocument{
+		Email:    createUser.Email,
 		Username: createUser.Username,
 		Password: hashedPasswroed,
 		Salt:     salt,
@@ -70,22 +71,25 @@ func (svc *UserService) GetUserById(id string) (*UserSchema.UserInfo, error) {
 	}
 
 	return &UserSchema.UserInfo{
+		Id:       userDoc.Id,
+		Email:    userDoc.Email,
 		Username: userDoc.Username,
 	}, nil
 }
 
 func (svc *UserService) ListUsers(baseQuery *basemodel.BaseQuery) (users []UserSchema.UserInfo, err error) {
 
-	user_docs, err := svc.userRepo.QueryUsers(baseQuery)
+	userDocs, err := svc.userRepo.QueryUsers(baseQuery)
 
 	if err != nil {
 		return
 	}
 
-	for _, user_doc := range user_docs {
+	for _, userDoc := range userDocs {
 		users = append(users, UserSchema.UserInfo{
-			Id:       user_doc.Id,
-			Username: user_doc.Username,
+			Id:       userDoc.Id,
+			Email:    userDoc.Email,
+			Username: userDoc.Username,
 		})
 	}
 
