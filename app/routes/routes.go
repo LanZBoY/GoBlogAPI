@@ -18,6 +18,7 @@ func SetupRouter(container *di.Container) *gin.Engine {
 
 	v1.RegistryAuthRouter(r.Group("/auth"), container)
 	v1.RegistryUserRouter(r.Group("/users", authMiddleware.RequiredAuth()), container)
+	v1.RegistryPostRouter(r.Group("/posts", authMiddleware.RequiredAuth()), container)
 
 	return r
 }

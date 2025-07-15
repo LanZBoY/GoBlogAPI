@@ -2,9 +2,6 @@ package user
 
 import (
 	"net/http"
-	"wentee/blog/app/schema/apperror"
-	"wentee/blog/app/schema/apperror/errcode"
-	"wentee/blog/app/schema/auth"
 	"wentee/blog/app/schema/basemodel"
 	UserSchema "wentee/blog/app/schema/user"
 	UserSvc "wentee/blog/app/services/user"
@@ -74,14 +71,9 @@ func (api *UserRouter) ListUsers(c *gin.Context) {
 }
 
 func (api *UserRouter) GetMe(c *gin.Context) {
-	userInfoAny, ok := c.Get(reqcontext.USER_INFO)
-	if !ok {
-		c.Error(apperror.New(http.StatusBadRequest, errcode.USER_NOT_FOUND, nil))
-		return
-	}
-	userInfo, ok := userInfoAny.(auth.JWTUserInfo)
-	if !ok {
-		c.Error(apperror.New(http.StatusInternalServerError, errcode.TPYE_ASSERTION_ERROR, nil))
+	userInfo, err := reqcontext.GetUserInfo(c)
+	if err != nil {
+		c.Error(err)
 		return
 	}
 
