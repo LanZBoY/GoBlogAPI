@@ -14,10 +14,10 @@ func SetupRouter(container *di.Container) *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(middleware.ErrorHandler())
+	authMiddleware := middleware.AuthMiddleware{}
 
 	v1.RegistryAuthRouter(r.Group("/auth"), container)
-	authMiddleware := middleware.AuthMiddleware{}
-	v1.RegistryUserRouter(r.Group("/users", authMiddleware.RequiredAuth), container)
+	v1.RegistryUserRouter(r.Group("/users", authMiddleware.RequiredAuth()), container)
 
 	return r
 }

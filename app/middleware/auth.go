@@ -16,31 +16,33 @@ type AuthMiddleware struct {
 	// userCollection *mongo.Collection
 }
 
-func (authMiddleware *AuthMiddleware) RequiredAuth(c *gin.Context) {
-	tokenString := c.GetHeader("Authorization")
+func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
 
-	if tokenString == "" {
-		c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
-		c.Abort()
-		return
+		if tokenString == "" {
+			c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
+			c.Abort()
+			return
+		}
+		token, err := jwt.ParseWithClaims(tokenString, &AuthSchema.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+
+			return []byte(config.JWT_SECRET), nil
+		})
+
+		if err != nil {
+			c.Error(err)
+			c.Abort()
+			return
+		}
+		claim, ok := token.Claims.(*AuthSchema.JWTClaims)
+		if !ok {
+			c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
+			c.Abort()
+			return
+		}
+
+		c.Set(context.USER_INFO, claim.UserInfo)
+		c.Next()
 	}
-	token, err := jwt.ParseWithClaims(tokenString, &AuthSchema.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-
-		return []byte(config.JWT_SECRET), nil
-	})
-
-	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-	claim, ok := token.Claims.(*AuthSchema.JWTClaims)
-	if !ok {
-		c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
-		c.Abort()
-		return
-	}
-
-	c.Set(context.USER_INFO, claim.UserInfo)
-	// c.Next()
 }
