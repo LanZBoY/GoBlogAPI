@@ -41,23 +41,53 @@ func (api *PostRouter) CreatePost(c *gin.Context) {
 }
 
 func (api *PostRouter) ListPosts(c *gin.Context) {
-	posts, err := api.postSvc.ListPosts()
+	query := basemodel.NewDefaultQuery()
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.Error(err)
+		return
+	}
+
+	total, posts, err := api.postSvc.ListPosts(&query)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	c.JSON(http.StatusOK, basemodel.BaseListResponse{Data: posts})
+	c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: posts})
 }
 
 func (api *PostRouter) GetPost(c *gin.Context) {
+	id := c.Param("id")
 
+	post, err := api.postSvc.GetPostById(id)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, basemodel.BaseResponse{Data: post})
 }
 
 func (api *PostRouter) UpdatePost(c *gin.Context) {
+	id := c.Param("id")
+	var updateData PostSchema.PostUpdate
+
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		c.Error(err)
+		return
+	}
+	if err := api.postSvc.UpdatePostById(id, &updateData); err != nil {
+		c.Error(err)
+		return
+	}
 
 }
 
 func (api *PostRouter) DeletePost(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := api.postSvc.DeletePostById(id); err != nil {
+		c.Error(err)
+		return
+	}
 
 }
 

@@ -10,8 +10,8 @@ type BaseListResponse struct {
 }
 
 type BaseQuery struct {
-	Skip  int64 `json:"skip"`
-	Limit int64 `json:"limit"`
+	Skip  int64 `form:"skip"`
+	Limit int64 `form:"limit"`
 }
 
 func NewDefaultQuery() BaseQuery {
