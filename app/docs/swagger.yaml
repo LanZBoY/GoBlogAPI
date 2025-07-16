@@ -1,9 +1,60 @@
 basePath: /
+definitions:
+  auth.LoginInfo:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  basemodel.BaseResponse:
+    properties:
+      data: {}
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: 嗨~你好~
   title: Blog API
   version: 0.1.0
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 登入資訊
+        in: body
+        name: loginInfo
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.TokenResponse'
+              type: object
+      summary: 登入API
+      tags:
+      - Auth
+securityDefinitions:
+  BaseAuth:
+    in: header
+    name: Authorizaton
+    type: apiKey
 swagger: "2.0"

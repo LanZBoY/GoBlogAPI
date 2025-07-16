@@ -17,6 +17,10 @@ import (
 // @description 嗨~你好~
 // @host localhost:8080
 // @basePath /
+
+// @securityDefinitions.apikey BaseAuth
+// @in header
+// @name Authorizaton
 func main() {
 	appCtx := setupCtx()
 	container := di.InitContainer(appCtx)
