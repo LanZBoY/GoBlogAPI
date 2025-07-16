@@ -94,7 +94,3 @@ func (api *PostRouter) DeletePost(c *gin.Context) {
 	}
 
 }
-
-// func (api *PostRouter) ListMyPosts(c *gin.Context) {
-
-// }
