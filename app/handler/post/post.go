@@ -21,7 +21,7 @@ func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter {
 }
 
 func (api *PostRouter) CreatePost(c *gin.Context) {
-
+	ctx := c.Request.Context()
 	userInfo, err := reqcontext.GetUserInfo(c)
 
 	if err != nil {
@@ -34,20 +34,21 @@ func (api *PostRouter) CreatePost(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err := api.postSvc.CreatePost(&postCreate, userInfo.Id); err != nil {
+	if err := api.postSvc.CreatePost(ctx, &postCreate, userInfo.Id); err != nil {
 		c.Error(err)
 		return
 	}
 }
 
 func (api *PostRouter) ListPosts(c *gin.Context) {
+	ctx := c.Request.Context()
 	query := basemodel.NewDefaultQuery()
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(err)
 		return
 	}
 
-	total, posts, err := api.postSvc.ListPosts(&query)
+	total, posts, err := api.postSvc.ListPosts(ctx, &query)
 	if err != nil {
 		c.Error(err)
 		return
@@ -56,9 +57,10 @@ func (api *PostRouter) ListPosts(c *gin.Context) {
 }
 
 func (api *PostRouter) GetPost(c *gin.Context) {
+	ctx := c.Request.Context()
 	id := c.Param("id")
 
-	post, err := api.postSvc.GetPostById(id)
+	post, err := api.postSvc.GetPostById(ctx, id)
 	if err != nil {
 		c.Error(err)
 		return
@@ -67,6 +69,7 @@ func (api *PostRouter) GetPost(c *gin.Context) {
 }
 
 func (api *PostRouter) UpdatePost(c *gin.Context) {
+	ctx := c.Request.Context()
 	id := c.Param("id")
 	var updateData PostSchema.PostUpdate
 
@@ -74,7 +77,7 @@ func (api *PostRouter) UpdatePost(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err := api.postSvc.UpdatePostById(id, &updateData); err != nil {
+	if err := api.postSvc.UpdatePostById(ctx, id, &updateData); err != nil {
 		c.Error(err)
 		return
 	}
@@ -82,9 +85,10 @@ func (api *PostRouter) UpdatePost(c *gin.Context) {
 }
 
 func (api *PostRouter) DeletePost(c *gin.Context) {
+	ctx := c.Request.Context()
 	id := c.Param("id")
 
-	if err := api.postSvc.DeletePostById(id); err != nil {
+	if err := api.postSvc.DeletePostById(ctx, id); err != nil {
 		c.Error(err)
 		return
 	}

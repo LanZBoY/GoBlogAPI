@@ -23,8 +23,8 @@ func NewPostRepo(postColletion *mongo.Collection) *PostRepo {
 	}
 }
 
-func (repo *PostRepo) CreatePost(postCreate *PostSchema.PostCreate, createdBy *primitive.ObjectID) (err error) {
-	_, err = repo.postColletion.InsertOne(context.TODO(), PostModel.PostDocument{
+func (repo *PostRepo) CreatePost(ctx context.Context, postCreate *PostSchema.PostCreate, createdBy *primitive.ObjectID) (err error) {
+	_, err = repo.postColletion.InsertOne(ctx, PostModel.PostDocument{
 		Title:     postCreate.Title,
 		Content:   postCreate.Content,
 		CreatedAt: time.Now().UTC(),
@@ -33,21 +33,21 @@ func (repo *PostRepo) CreatePost(postCreate *PostSchema.PostCreate, createdBy *p
 	return
 }
 
-func (repo *PostRepo) ListPosts(query *basemodel.BaseQuery) (total int64, posts []PostModel.PostWithCreatorDocument, err error) {
+func (repo *PostRepo) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, posts []PostModel.PostWithCreatorDocument, err error) {
 	totalPipe, queryPipe := getPostWithCreatorListPipeline(query.Skip, query.Limit)
-	total, err = pipefactory.GetCount(context.TODO(), repo.postColletion, totalPipe)
+	total, err = pipefactory.GetCount(ctx, repo.postColletion, totalPipe)
 	if err != nil {
 		return
 	}
-	cursor, err := repo.postColletion.Aggregate(context.TODO(), queryPipe)
+	cursor, err := repo.postColletion.Aggregate(ctx, queryPipe)
 	if err != nil {
 		return
 	}
-	err = cursor.All(context.TODO(), &posts)
+	err = cursor.All(ctx, &posts)
 	return
 }
 
-func (repo *PostRepo) GetPostById(id primitive.ObjectID) (post PostModel.PostWithCreatorDocument, err error) {
+func (repo *PostRepo) GetPostById(ctx context.Context, id primitive.ObjectID) (post PostModel.PostWithCreatorDocument, err error) {
 	pipeline := bson.A{
 		bson.D{{Key: "$match", Value: bson.D{{Key: "_id", Value: id}}}},
 		bson.D{
@@ -85,25 +85,25 @@ func (repo *PostRepo) GetPostById(id primitive.ObjectID) (post PostModel.PostWit
 		bson.D{{Key: "$project", Value: bson.D{{Key: "CreatedBy", Value: 0}}}},
 	}
 
-	cursor, err := repo.postColletion.Aggregate(context.TODO(), pipeline)
+	cursor, err := repo.postColletion.Aggregate(ctx, pipeline)
 
 	if err != nil {
 		return
 	}
 
-	if cursor.Next(context.TODO()) {
+	if cursor.Next(ctx) {
 		cursor.Decode(&post)
 	}
 
 	return
 }
 
-func (repo *PostRepo) UpdatePostById(id primitive.ObjectID, updateData *PostSchema.PostUpdate) (err error) {
-	_, err = repo.postColletion.UpdateOne(context.TODO(), bson.M{PostModel.FieldId: id}, bson.M{"$set": updateData})
+func (repo *PostRepo) UpdatePostById(ctx context.Context, id primitive.ObjectID, updateData *PostSchema.PostUpdate) (err error) {
+	_, err = repo.postColletion.UpdateOne(ctx, bson.M{PostModel.FieldId: id}, bson.M{"$set": updateData})
 	return
 }
 
-func (repo *PostRepo) DeletePostById(id primitive.ObjectID) (err error) {
-	_, err = repo.postColletion.DeleteOne(context.TODO(), bson.M{PostModel.FieldId: id})
+func (repo *PostRepo) DeletePostById(ctx context.Context, id primitive.ObjectID) (err error) {
+	_, err = repo.postColletion.DeleteOne(ctx, bson.M{PostModel.FieldId: id})
 	return
 }

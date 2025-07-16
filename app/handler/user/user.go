@@ -21,6 +21,7 @@ func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter {
 }
 
 func (api *UserRouter) CreateUser(c *gin.Context) {
+	ctx := c.Request.Context()
 	var userCreate UserSchema.UserCreate
 
 	if err := c.ShouldBindJSON(&userCreate); err != nil {
@@ -28,7 +29,7 @@ func (api *UserRouter) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := api.userSvc.RegistryUser(&userCreate); err != nil {
+	if err := api.userSvc.RegistryUser(ctx, &userCreate); err != nil {
 		c.Error(err)
 		return
 	}
@@ -36,8 +37,9 @@ func (api *UserRouter) CreateUser(c *gin.Context) {
 }
 
 func (api *UserRouter) GetUser(c *gin.Context) {
+	ctx := c.Request.Context()
 	id := c.Param("id")
-	userData, err := api.userSvc.GetUserById(id)
+	userData, err := api.userSvc.GetUserById(ctx, id)
 
 	if err != nil {
 		c.Error(err)
@@ -48,21 +50,21 @@ func (api *UserRouter) GetUser(c *gin.Context) {
 }
 
 func (api *UserRouter) ListUsers(c *gin.Context) {
-
+	ctx := c.Request.Context()
 	baseQuery := basemodel.NewDefaultQuery()
 
 	if err := c.ShouldBindQuery(&baseQuery); err != nil {
 		c.Error(err)
 		return
 	}
-	total, err := api.userSvc.CountUsers()
+	total, err := api.userSvc.CountUsers(ctx)
 
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	users, err := api.userSvc.ListUsers(&baseQuery)
+	users, err := api.userSvc.ListUsers(ctx, &baseQuery)
 	if err != nil {
 		c.Error(err)
 		return
@@ -71,13 +73,14 @@ func (api *UserRouter) ListUsers(c *gin.Context) {
 }
 
 func (api *UserRouter) GetMe(c *gin.Context) {
+	ctx := c.Request.Context()
 	userInfo, err := reqcontext.GetUserInfo(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	userData, err := api.userSvc.GetUserById(userInfo.Id)
+	userData, err := api.userSvc.GetUserById(ctx, userInfo.Id)
 
 	if err != nil {
 		c.Error(err)
@@ -87,6 +90,7 @@ func (api *UserRouter) GetMe(c *gin.Context) {
 }
 
 func (api *UserRouter) UpdateUser(c *gin.Context) {
+	ctx := c.Request.Context()
 	id := c.Param("id")
 	var userUpdate UserSchema.UserUpdate
 
@@ -94,7 +98,7 @@ func (api *UserRouter) UpdateUser(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err := api.userSvc.UpdateUserById(id, userUpdate); err != nil {
+	if err := api.userSvc.UpdateUserById(ctx, id, userUpdate); err != nil {
 		c.Error(err)
 		return
 	}
@@ -102,7 +106,8 @@ func (api *UserRouter) UpdateUser(c *gin.Context) {
 }
 
 func (api *UserRouter) DeleteUser(c *gin.Context) {
-	err := api.userSvc.DeleteUserById(c.Param("id"))
+	ctx := c.Request.Context()
+	err := api.userSvc.DeleteUserById(ctx, c.Param("id"))
 
 	if err != nil {
 		c.Error(err)

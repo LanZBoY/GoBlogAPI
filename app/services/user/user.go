@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"net/http"
 	UserModel "wentee/blog/app/model/mongodb/user"
 	UserRepo "wentee/blog/app/repo/user"
@@ -25,13 +26,13 @@ func NewUserService(userRepo *UserRepo.UserRepo) *UserService {
 	}
 }
 
-func (svc *UserService) CountUsers() (total int64, err error) {
-	return svc.userRepo.CountUsers()
+func (svc *UserService) CountUsers(ctx context.Context) (total int64, err error) {
+	return svc.userRepo.CountUsers(ctx)
 }
 
-func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
+func (svc *UserService) RegistryUser(ctx context.Context, createUser *UserSchema.UserCreate) error {
 
-	if user, _ := svc.userRepo.GetUserByEmail(createUser.Email); user != nil {
+	if user, _ := svc.userRepo.GetUserByEmail(ctx, createUser.Email); user != nil {
 		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, nil)
 	}
 
@@ -46,7 +47,7 @@ func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 		return err
 	}
 
-	if err := svc.userRepo.CreateUser(&UserModel.UserDocument{
+	if err := svc.userRepo.CreateUser(ctx, &UserModel.UserDocument{
 		Email:    createUser.Email,
 		Username: createUser.Username,
 		Password: hashedPasswroed,
@@ -58,13 +59,13 @@ func (svc *UserService) RegistryUser(createUser *UserSchema.UserCreate) error {
 	return nil
 }
 
-func (svc *UserService) GetUserById(id string) (*UserSchema.UserInfo, error) {
+func (svc *UserService) GetUserById(ctx context.Context, id string) (*UserSchema.UserInfo, error) {
 	oId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
-	userDoc, err := svc.userRepo.GetUserById(oId, options.FindOne().SetProjection(bson.M{"Password": 0}))
+	userDoc, err := svc.userRepo.GetUserById(ctx, oId, options.FindOne().SetProjection(bson.M{UserModel.FieldPassword: 0}))
 
 	if err != nil {
 		return nil, err
@@ -77,9 +78,9 @@ func (svc *UserService) GetUserById(id string) (*UserSchema.UserInfo, error) {
 	}, nil
 }
 
-func (svc *UserService) ListUsers(baseQuery *basemodel.BaseQuery) (users []UserSchema.UserInfo, err error) {
+func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.BaseQuery) (users []UserSchema.UserInfo, err error) {
 
-	userDocs, err := svc.userRepo.QueryUsers(baseQuery)
+	userDocs, err := svc.userRepo.QueryUsers(ctx, baseQuery)
 
 	if err != nil {
 		return
@@ -97,20 +98,20 @@ func (svc *UserService) ListUsers(baseQuery *basemodel.BaseQuery) (users []UserS
 
 }
 
-func (svc *UserService) UpdateUserById(id string, userUpdate UserSchema.UserUpdate) (err error) {
+func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate UserSchema.UserUpdate) (err error) {
 	oId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
-	err = svc.userRepo.UpdateUserById(oId, userUpdate)
+	err = svc.userRepo.UpdateUserById(ctx, oId, userUpdate)
 	return
 }
 
-func (svc *UserService) DeleteUserById(id string) (err error) {
+func (svc *UserService) DeleteUserById(ctx context.Context, id string) (err error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
-	err = svc.userRepo.DeleteUserById(oid)
+	err = svc.userRepo.DeleteUserById(ctx, oid)
 	return
 }

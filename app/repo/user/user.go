@@ -22,53 +22,53 @@ func NewUserRepo(userCollection *mongo.Collection) *UserRepo {
 		userCollection: userCollection,
 	}
 }
-func (repo *UserRepo) CountUsers() (int64, error) {
-	return repo.userCollection.CountDocuments(context.TODO(), bson.M{})
+func (repo *UserRepo) CountUsers(ctx context.Context) (int64, error) {
+	return repo.userCollection.CountDocuments(ctx, bson.M{})
 }
 
-func (repo *UserRepo) CreateUser(createUser *UserModel.UserDocument) error {
-	_, err := repo.userCollection.InsertOne(context.TODO(), createUser)
+func (repo *UserRepo) CreateUser(ctx context.Context, createUser *UserModel.UserDocument) error {
+	_, err := repo.userCollection.InsertOne(ctx, createUser)
 	return err
 }
 
-func (repo *UserRepo) QueryUsers(query *basemodel.BaseQuery) ([]UserModel.UserDocument, error) {
+func (repo *UserRepo) QueryUsers(ctx context.Context, query *basemodel.BaseQuery) ([]UserModel.UserDocument, error) {
 	var userDocs []UserModel.UserDocument
 
-	cur, err := repo.userCollection.Find(context.TODO(), bson.M{}, options.Find().SetSkip(query.Skip).SetLimit(query.Limit))
+	cur, err := repo.userCollection.Find(ctx, bson.M{}, options.Find().SetSkip(query.Skip).SetLimit(query.Limit))
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := cur.All(context.TODO(), &userDocs); err != nil {
+	if err := cur.All(ctx, &userDocs); err != nil {
 		return nil, err
 	}
 
 	return userDocs, nil
 }
 
-func (repo *UserRepo) GetUserById(id primitive.ObjectID, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
+func (repo *UserRepo) GetUserById(ctx context.Context, id primitive.ObjectID, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
 	var userDoc UserModel.UserDocument
-	if err := repo.userCollection.FindOne(context.TODO(), bson.M{UserModel.FieldId: id}, opts...).Decode(&userDoc); err != nil {
+	if err := repo.userCollection.FindOne(ctx, bson.M{UserModel.FieldId: id}, opts...).Decode(&userDoc); err != nil {
 		return nil, err
 	}
 	return &userDoc, nil
 }
 
-func (repo *UserRepo) GetUserByEmail(email string, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
+func (repo *UserRepo) GetUserByEmail(ctx context.Context, email string, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
 	var userDoc UserModel.UserDocument
-	if err := repo.userCollection.FindOne(context.TODO(), bson.M{UserModel.FieldEmail: email}, opts...).Decode(&userDoc); err != nil {
+	if err := repo.userCollection.FindOne(ctx, bson.M{UserModel.FieldEmail: email}, opts...).Decode(&userDoc); err != nil {
 		return nil, err
 	}
 	return &userDoc, nil
 }
 
-func (repo *UserRepo) UpdateUserById(id primitive.ObjectID, updateData UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
-	_, err = repo.userCollection.UpdateOne(context.TODO(), bson.M{UserModel.FieldId: id}, bson.M{"$set": updateData})
+func (repo *UserRepo) UpdateUserById(ctx context.Context, id primitive.ObjectID, updateData UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
+	_, err = repo.userCollection.UpdateOne(ctx, bson.M{UserModel.FieldId: id}, bson.M{"$set": updateData})
 	return
 }
 
-func (repo *UserRepo) DeleteUserById(id primitive.ObjectID, opts ...*options.DeleteOptions) (err error) {
-	_, err = repo.userCollection.DeleteOne(context.TODO(), bson.M{UserModel.FieldId: id}, opts...)
+func (repo *UserRepo) DeleteUserById(ctx context.Context, id primitive.ObjectID, opts ...*options.DeleteOptions) (err error) {
+	_, err = repo.userCollection.DeleteOne(ctx, bson.M{UserModel.FieldId: id}, opts...)
 	return
 }

@@ -21,13 +21,13 @@ func NewAuthRouter(authSvc *AuthSvc.AuthService) *AuthRouter {
 }
 
 func (api *AuthRouter) Login(c *gin.Context) {
+	ctx := c.Request.Context()
 	var loginInfo AuthSchema.LoginInfo
-
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
 		c.Error(err)
 		return
 	}
-	tokenString, err := api.authSvc.TryLogin(&loginInfo)
+	tokenString, err := api.authSvc.TryLogin(ctx, &loginInfo)
 
 	if err != nil {
 		c.Error(err)

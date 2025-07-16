@@ -1,6 +1,7 @@
 package post
 
 import (
+	"context"
 	PostRepo "wentee/blog/app/repo/post"
 	"wentee/blog/app/schema/basemodel"
 	PostSchema "wentee/blog/app/schema/post"
@@ -19,17 +20,17 @@ func NewPostService(postRepo *PostRepo.PostRepo) *PostService {
 	}
 }
 
-func (svc *PostService) CreatePost(postCreate *PostSchema.PostCreate, createdByString string) (err error) {
+func (svc *PostService) CreatePost(ctx context.Context, postCreate *PostSchema.PostCreate, createdByString string) (err error) {
 	createdBy, err := primitive.ObjectIDFromHex(createdByString)
 	if err != nil {
 		return
 	}
-	err = svc.postRepo.CreatePost(postCreate, &createdBy)
+	err = svc.postRepo.CreatePost(ctx, postCreate, &createdBy)
 	return
 }
 
-func (svc *PostService) ListPosts(query *basemodel.BaseQuery) (total int64, postSlice []PostSchena.PostList, err error) {
-	total, posts, err := svc.postRepo.ListPosts(query)
+func (svc *PostService) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, postSlice []PostSchena.PostList, err error) {
+	total, posts, err := svc.postRepo.ListPosts(ctx, query)
 
 	postSlice = make([]PostSchena.PostList, len(posts))
 
@@ -44,13 +45,13 @@ func (svc *PostService) ListPosts(query *basemodel.BaseQuery) (total int64, post
 	return
 }
 
-func (svc *PostService) GetPostById(id string) (post PostSchema.Post, err error) {
+func (svc *PostService) GetPostById(ctx context.Context, id string) (post PostSchema.Post, err error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return
 	}
-	postDoc, err := svc.postRepo.GetPostById(oid)
+	postDoc, err := svc.postRepo.GetPostById(ctx, oid)
 	if err != nil {
 		return
 	}
@@ -66,23 +67,23 @@ func (svc *PostService) GetPostById(id string) (post PostSchema.Post, err error)
 	return
 }
 
-func (svc *PostService) UpdatePostById(id string, updateData *PostSchema.PostUpdate) (err error) {
+func (svc *PostService) UpdatePostById(ctx context.Context, id string, updateData *PostSchema.PostUpdate) (err error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
-	err = svc.postRepo.UpdatePostById(oid, updateData)
+	err = svc.postRepo.UpdatePostById(ctx, oid, updateData)
 	return
 }
 
-func (svc *PostService) DeletePostById(id string) (err error) {
+func (svc *PostService) DeletePostById(ctx context.Context, id string) (err error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return
 	}
 
-	err = svc.postRepo.DeletePostById(oid)
+	err = svc.postRepo.DeletePostById(ctx, oid)
 
 	return
 }

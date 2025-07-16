@@ -6,6 +6,7 @@ const (
 	FieldId       = "_id"
 	FieldEmail    = "Email"
 	FieldUsername = "Username"
+	FieldPassword = "Password"
 )
 
 type UserDocument struct {

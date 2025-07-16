@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"time"
 	"wentee/blog/app/config"
@@ -23,9 +24,9 @@ func NewAuthService(userRepo *UserRepo.UserRepo) *AuthService {
 	}
 }
 
-func (authSvc *AuthService) TryLogin(loginInfo *AuthSchema.LoginInfo) (tokenString string, err error) {
+func (authSvc *AuthService) TryLogin(ctx context.Context, loginInfo *AuthSchema.LoginInfo) (tokenString string, err error) {
 
-	userDoc, err := authSvc.userRepo.GetUserByEmail(loginInfo.Email)
+	userDoc, err := authSvc.userRepo.GetUserByEmail(ctx, loginInfo.Email)
 
 	if err != nil {
 		return
