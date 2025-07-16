@@ -20,13 +20,13 @@ func NewAuthRouter(authSvc *AuthSvc.AuthService) *AuthRouter {
 	}
 }
 
-// @Summary 登入API
-// @Tags	Auth
-// @Accept	application/json
+// @Summary	登入API
+// @Tags		Auth
+// @Accept		application/json
 // @Produce	application/json
-// @Param	loginInfo	body	AuthSchema.LoginInfo	true	"登入資訊"
-// @Success	200	{object}	basemodel.BaseResponse{data=AuthSchema.TokenResponse}
-// @Router	/auth/login	[post]
+// @Param		loginInfo	body		AuthSchema.LoginInfo	true	"登入資訊"
+// @Success	200			{object}	basemodel.BaseResponse{data=AuthSchema.TokenResponse}
+// @Router		/auth/login	[post]
 func (api *AuthRouter) Login(c *gin.Context) {
 	ctx := c.Request.Context()
 	var loginInfo AuthSchema.LoginInfo

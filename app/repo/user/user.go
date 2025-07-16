@@ -2,7 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	UserModel "wentee/blog/app/model/mongodb/user"
+	"wentee/blog/app/schema/apperror"
+	"wentee/blog/app/schema/apperror/errcode"
 	"wentee/blog/app/schema/basemodel"
 	UserSchema "wentee/blog/app/schema/user"
 
@@ -50,6 +54,9 @@ func (repo *UserRepo) QueryUsers(ctx context.Context, query *basemodel.BaseQuery
 func (repo *UserRepo) GetUserById(ctx context.Context, id primitive.ObjectID, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
 	var userDoc UserModel.UserDocument
 	if err := repo.userCollection.FindOne(ctx, bson.M{UserModel.FieldId: id}, opts...).Decode(&userDoc); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, apperror.New(http.StatusNotFound, errcode.USER_NOT_FOUND, err)
+		}
 		return nil, err
 	}
 	return &userDoc, nil
@@ -58,6 +65,9 @@ func (repo *UserRepo) GetUserById(ctx context.Context, id primitive.ObjectID, op
 func (repo *UserRepo) GetUserByEmail(ctx context.Context, email string, opts ...*options.FindOneOptions) (*UserModel.UserDocument, error) {
 	var userDoc UserModel.UserDocument
 	if err := repo.userCollection.FindOne(ctx, bson.M{UserModel.FieldEmail: email}, opts...).Decode(&userDoc); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, apperror.New(http.StatusNotFound, errcode.USER_NOT_FOUND, err)
+		}
 		return nil, err
 	}
 	return &userDoc, nil

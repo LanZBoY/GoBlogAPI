@@ -12,15 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// @title	Blog API
-// @version 0.1.0
-// @description 嗨~你好~
-// @host localhost:8080
-// @basePath /
+//	@title			Blog API
+//	@version		0.1.0
+//	@description	嗨~你好~
+//	@basePath		/
 
-// @securityDefinitions.apikey BaseAuth
-// @in header
-// @name Authorizaton
+// @securityDefinitions.apikey	BaseAuth
+// @in							header
+// @name						Authorizaton
 func main() {
 	appCtx := setupCtx()
 	container := di.InitContainer(appCtx)
