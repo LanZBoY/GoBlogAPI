@@ -11,7 +11,7 @@ import (
 )
 
 type PostRouter struct {
-	postSvc *PostSvc.PostService
+	postSvc PostSvc.IPostService
 }
 
 func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter {

@@ -5,13 +5,12 @@ import (
 	PostRepo "wentee/blog/app/repo/post"
 	"wentee/blog/app/schema/basemodel"
 	PostSchema "wentee/blog/app/schema/post"
-	PostSchena "wentee/blog/app/schema/post"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PostService struct {
-	postRepo *PostRepo.PostRepo
+	postRepo PostRepo.IPostRepository
 }
 
 func NewPostService(postRepo *PostRepo.PostRepo) *PostService {
@@ -29,16 +28,16 @@ func (svc *PostService) CreatePost(ctx context.Context, postCreate *PostSchema.P
 	return
 }
 
-func (svc *PostService) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, postSlice []PostSchena.PostList, err error) {
+func (svc *PostService) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, postSlice []PostSchema.PostList, err error) {
 	total, posts, err := svc.postRepo.ListPosts(ctx, query)
 
-	postSlice = make([]PostSchena.PostList, len(posts))
+	postSlice = make([]PostSchema.PostList, len(posts))
 
 	for index, post := range posts {
-		postSlice[index] = PostSchena.PostList{
+		postSlice[index] = PostSchema.PostList{
 			Id:      post.Id,
 			Title:   post.Title,
-			Creator: PostSchena.Creator{Id: post.Creator.Id, Username: post.Creator.Username},
+			Creator: PostSchema.Creator{Id: post.Creator.Id, Username: post.Creator.Username},
 		}
 	}
 
@@ -55,11 +54,11 @@ func (svc *PostService) GetPostById(ctx context.Context, id string) (post PostSc
 	if err != nil {
 		return
 	}
-	post = PostSchena.Post{
-		PostList: PostSchena.PostList{
+	post = PostSchema.Post{
+		PostList: PostSchema.PostList{
 			Id:      postDoc.Id,
 			Title:   postDoc.Title,
-			Creator: PostSchena.Creator{Id: postDoc.Creator.Id, Username: postDoc.Creator.Username},
+			Creator: PostSchema.Creator{Id: postDoc.Creator.Id, Username: postDoc.Creator.Username},
 		},
 		Content:   *postDoc.Content,
 		CreatedAt: postDoc.CreatedAt,

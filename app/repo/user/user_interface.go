@@ -5,10 +5,20 @@ import (
 	UserModel "wentee/blog/app/model/mongodb/user"
 	"wentee/blog/app/schema/basemodel"
 	UserSchema "wentee/blog/app/schema/user"
+	"wentee/blog/app/utils/mongo/icollection"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type IUserCollection interface {
+	icollection.ICountDocuments
+	icollection.IFind
+	icollection.IFindOne
+	icollection.IInsertOne
+	icollection.IUpdateOne
+	icollection.IDeleteOne
+}
 
 type IUserRepository interface {
 	CountUsers(context.Context) (int64, error)

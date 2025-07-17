@@ -6,7 +6,7 @@ import (
 	PostModel "wentee/blog/app/model/mongodb/post"
 	"wentee/blog/app/schema/basemodel"
 	PostSchema "wentee/blog/app/schema/post"
-	"wentee/blog/app/utils/mongo/pipefactory"
+	"wentee/blog/app/utils/mongo/mongoutils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,7 +14,7 @@ import (
 )
 
 type PostRepo struct {
-	postColletion *mongo.Collection
+	postColletion IPostCollection
 }
 
 func NewPostRepo(postColletion *mongo.Collection) *PostRepo {
@@ -35,7 +35,7 @@ func (repo *PostRepo) CreatePost(ctx context.Context, postCreate *PostSchema.Pos
 
 func (repo *PostRepo) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, posts []PostModel.PostWithCreatorDocument, err error) {
 	totalPipe, queryPipe := getPostWithCreatorListPipeline(query.Skip, query.Limit)
-	total, err = pipefactory.GetCount(ctx, repo.postColletion, totalPipe)
+	total, err = mongoutils.CountDocumentWithPipeline(ctx, repo.postColletion, totalPipe)
 	if err != nil {
 		return
 	}
@@ -43,6 +43,7 @@ func (repo *PostRepo) ListPosts(ctx context.Context, query *basemodel.BaseQuery)
 	if err != nil {
 		return
 	}
+	defer cursor.Close(ctx)
 	err = cursor.All(ctx, &posts)
 	return
 }
@@ -90,6 +91,8 @@ func (repo *PostRepo) GetPostById(ctx context.Context, id primitive.ObjectID) (p
 	if err != nil {
 		return
 	}
+
+	defer cursor.Close(ctx)
 
 	if cursor.Next(ctx) {
 		cursor.Decode(&post)

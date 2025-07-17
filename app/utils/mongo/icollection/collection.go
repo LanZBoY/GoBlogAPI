@@ -30,3 +30,7 @@ type IUpdateOne interface {
 type IDeleteOne interface {
 	DeleteOne(context.Context, any, ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
+
+type IAggregate interface {
+	Aggregate(context.Context, interface{}, ...*options.AggregateOptions) (*mongo.Cursor, error)
+}
