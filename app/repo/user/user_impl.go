@@ -20,7 +20,7 @@ type UserRepo struct {
 	UserCollection IUserCollection
 }
 
-func NewUserRepo(userCollection *mongo.Collection) *UserRepo {
+func NewUserRepo(userCollection IUserCollection) *UserRepo {
 
 	return &UserRepo{
 		UserCollection: userCollection,
