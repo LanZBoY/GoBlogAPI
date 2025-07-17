@@ -17,16 +17,15 @@ import (
 //	@description	嗨~你好~
 //	@basePath		/
 
-// @securityDefinitions.apikey	BaseAuth
+// @securityDefinitions.apikey	BasicAuth
 // @in							header
-// @name						Authorizaton
+// @name						Authorization
 func main() {
 	appCtx := setupCtx()
 	container := di.InitContainer(appCtx)
 	router := routes.SetupRouter(container)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	router.Run(":8080")
 
 }

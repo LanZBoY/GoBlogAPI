@@ -20,6 +20,15 @@ func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter {
 	}
 }
 
+// @summary 建立使用者
+// @description 建立一般使用者
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @param UserCreateData body UserSchema.UserCreate true "使用者建立資訊"
+// @Success	201
+// @router /users [POST]
 func (api *UserRouter) CreateUser(c *gin.Context) {
 	ctx := c.Request.Context()
 	var userCreate UserSchema.UserCreate
@@ -36,6 +45,15 @@ func (api *UserRouter) CreateUser(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// @summary 取得使用者資訊
+// @description 取得使用者
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @param id path string true "使用者識別ID"
+// @Success	200 {object} basemodel.BaseResponse{data=UserSchema.UserInfo}
+// @router /users/{id} [GET]
 func (api *UserRouter) GetUser(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -49,6 +67,14 @@ func (api *UserRouter) GetUser(c *gin.Context) {
 
 }
 
+// @summary 使用者列表
+// @description 取得使用者列表
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @Success	200 {object} basemodel.BaseListResponse{total=int, data=[]UserSchema.UserInfo}
+// @router /users [GET]
 func (api *UserRouter) ListUsers(c *gin.Context) {
 	ctx := c.Request.Context()
 	baseQuery := basemodel.NewDefaultQuery()
@@ -72,6 +98,14 @@ func (api *UserRouter) ListUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: users})
 }
 
+// @summary 取得我的資訊
+// @description 取得我的基本資訊
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @Success	200 {object} basemodel.BaseResponse{data=UserSchema.UserInfo}
+// @router /users/me [GET]
 func (api *UserRouter) GetMe(c *gin.Context) {
 	ctx := c.Request.Context()
 	userInfo, err := reqcontext.GetUserInfo(c)
@@ -89,6 +123,36 @@ func (api *UserRouter) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})
 }
 
+// @summary 刪除使用者
+// @description 刪除使用者
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @param id path string true "使用者識別ID"
+// @Success	204
+// @router /users/{id} [DELETE]
+func (api *UserRouter) DeleteUser(c *gin.Context) {
+	ctx := c.Request.Context()
+	err := api.userSvc.DeleteUserById(ctx, c.Param("id"))
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+// @summary 更新使用者資訊
+// @description 更新使用者
+// @security BasicAuth
+// @tags User
+// @accept application/json
+// @produce application/json
+// @param id path string true "使用者識別ID"
+// @Param UserUpdate body UserSchema.UserUpdate true "更新使用者資訊欄位"
+// @Success	200
+// @router /users/{id} [PATCH]
 func (api *UserRouter) UpdateUser(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -103,15 +167,4 @@ func (api *UserRouter) UpdateUser(c *gin.Context) {
 		return
 	}
 
-}
-
-func (api *UserRouter) DeleteUser(c *gin.Context) {
-	ctx := c.Request.Context()
-	err := api.userSvc.DeleteUserById(ctx, c.Param("id"))
-
-	if err != nil {
-		c.Error(err)
-		return
-	}
-	c.Status(http.StatusNoContent)
 }

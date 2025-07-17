@@ -12,7 +12,8 @@
             "mode": "debug",
             "program": "${workspaceFolder}/app/main.go",
             "console": "integratedTerminal",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "preLaunchTask": "SwagDoc Generating Task"
         }
     ]
 }

@@ -20,6 +20,15 @@ func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter {
 	}
 }
 
+// @summary 建立貼文
+// @description 建立貼文
+// @security BasicAuth
+// @tags Post
+// @accept application/json
+// @produce application/json
+// @param PostCreateData body PostSchema.PostCreate true "貼文資訊"
+// @Success	201
+// @router /posts [POST]
 func (api *PostRouter) CreatePost(c *gin.Context) {
 	ctx := c.Request.Context()
 	userInfo, err := reqcontext.GetUserInfo(c)
@@ -40,6 +49,14 @@ func (api *PostRouter) CreatePost(c *gin.Context) {
 	}
 }
 
+// @summary 貼文列表
+// @description 取得貼文列表
+// @security BasicAuth
+// @tags Post
+// @accept application/json
+// @produce application/json
+// @Success	200 {object} basemodel.BaseListResponse{total=int, data=[]PostSchema.PostList}
+// @router /posts [GET]
 func (api *PostRouter) ListPosts(c *gin.Context) {
 	ctx := c.Request.Context()
 	query := basemodel.NewDefaultQuery()
@@ -56,6 +73,15 @@ func (api *PostRouter) ListPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: posts})
 }
 
+// @summary 取得貼文內容
+// @description 透過ID取得貼文內容
+// @security BasicAuth
+// @tags Post
+// @accept application/json
+// @produce application/json
+// @param id path string true "貼文ID"
+// @Success	200 {object} basemodel.BaseResponse{data=PostSchema.Post}
+// @router /posts/{id} [GET]
 func (api *PostRouter) GetPost(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -68,6 +94,16 @@ func (api *PostRouter) GetPost(c *gin.Context) {
 	c.JSON(http.StatusOK, basemodel.BaseResponse{Data: post})
 }
 
+// @summary 更新貼文內容
+// @description 透過ID更新貼文內容
+// @security BasicAuth
+// @tags Post
+// @accept application/json
+// @produce application/json
+// @param id path string true "貼文ID"
+// @Param PostUpdate body PostSchema.PostUpdate true "更新貼文欄位"
+// @Success	200
+// @router /posts/{id} [PATCH]
 func (api *PostRouter) UpdatePost(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -84,6 +120,15 @@ func (api *PostRouter) UpdatePost(c *gin.Context) {
 
 }
 
+// @summary 刪除貼文
+// @description 透過ID刪除貼文
+// @security BasicAuth
+// @tags Post
+// @accept application/json
+// @produce application/json
+// @param id path string true "貼文ID"
+// @Success	204
+// @router /posts/{id} [DELETE]
 func (api *PostRouter) DeletePost(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")

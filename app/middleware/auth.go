@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"wentee/blog/app/config"
 	"wentee/blog/app/schema/apperror"
@@ -31,7 +32,14 @@ func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.Error(err)
+			switch {
+			case errors.Is(err, jwt.ErrSignatureInvalid):
+				c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, err))
+			case errors.Is(err, jwt.ErrTokenExpired):
+				c.Error(apperror.New(http.StatusForbidden, errcode.EXPIRED_TOKEN, err))
+			default:
+				c.Error(err)
+			}
 			c.Abort()
 			return
 		}

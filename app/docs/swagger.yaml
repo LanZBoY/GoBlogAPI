@@ -15,9 +15,87 @@ definitions:
       token:
         type: string
     type: object
+  basemodel.BaseListResponse:
+    properties:
+      data: {}
+      total:
+        type: integer
+    type: object
   basemodel.BaseResponse:
     properties:
       data: {}
+    type: object
+  post.Creator:
+    properties:
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  post.Post:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      creator:
+        $ref: '#/definitions/post.Creator'
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  post.PostCreate:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  post.PostList:
+    properties:
+      creator:
+        $ref: '#/definitions/post.Creator'
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  post.PostUpdate:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  user.UserCreate:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UserInfo:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  user.UserUpdate:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
     type: object
 info:
   contact: {}
@@ -51,9 +129,273 @@ paths:
       summary: 登入API
       tags:
       - Auth
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: 取得貼文列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseListResponse'
+            - properties:
+                ' data':
+                  items:
+                    $ref: '#/definitions/post.PostList'
+                  type: array
+                total:
+                  type: integer
+              type: object
+      security:
+      - BasicAuth: []
+      summary: 貼文列表
+      tags:
+      - Post
+    post:
+      consumes:
+      - application/json
+      description: 建立貼文
+      parameters:
+      - description: 貼文資訊
+        in: body
+        name: PostCreateData
+        required: true
+        schema:
+          $ref: '#/definitions/post.PostCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      security:
+      - BasicAuth: []
+      summary: 建立貼文
+      tags:
+      - Post
+  /posts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 透過ID刪除貼文
+      parameters:
+      - description: 貼文ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BasicAuth: []
+      summary: 刪除貼文
+      tags:
+      - Post
+    get:
+      consumes:
+      - application/json
+      description: 透過ID取得貼文內容
+      parameters:
+      - description: 貼文ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/post.Post'
+              type: object
+      security:
+      - BasicAuth: []
+      summary: 取得貼文內容
+      tags:
+      - Post
+    patch:
+      consumes:
+      - application/json
+      description: 透過ID更新貼文內容
+      parameters:
+      - description: 貼文ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新貼文欄位
+        in: body
+        name: PostUpdate
+        required: true
+        schema:
+          $ref: '#/definitions/post.PostUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BasicAuth: []
+      summary: 更新貼文內容
+      tags:
+      - Post
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: 取得使用者列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseListResponse'
+            - properties:
+                ' data':
+                  items:
+                    $ref: '#/definitions/user.UserInfo'
+                  type: array
+                total:
+                  type: integer
+              type: object
+      security:
+      - BasicAuth: []
+      summary: 使用者列表
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: 建立一般使用者
+      parameters:
+      - description: 使用者建立資訊
+        in: body
+        name: UserCreateData
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      security:
+      - BasicAuth: []
+      summary: 建立使用者
+      tags:
+      - User
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 刪除使用者
+      parameters:
+      - description: 使用者識別ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BasicAuth: []
+      summary: 刪除使用者
+      tags:
+      - User
+    get:
+      consumes:
+      - application/json
+      description: 取得使用者
+      parameters:
+      - description: 使用者識別ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserInfo'
+              type: object
+      security:
+      - BasicAuth: []
+      summary: 取得使用者資訊
+      tags:
+      - User
+    patch:
+      consumes:
+      - application/json
+      description: 更新使用者
+      parameters:
+      - description: 使用者識別ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新使用者資訊欄位
+        in: body
+        name: UserUpdate
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BasicAuth: []
+      summary: 更新使用者資訊
+      tags:
+      - User
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: 取得我的基本資訊
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/basemodel.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserInfo'
+              type: object
+      security:
+      - BasicAuth: []
+      summary: 取得我的資訊
+      tags:
+      - User
 securityDefinitions:
-  BaseAuth:
+  BasicAuth:
     in: header
-    name: Authorizaton
+    name: Authorization
     type: apiKey
 swagger: "2.0"

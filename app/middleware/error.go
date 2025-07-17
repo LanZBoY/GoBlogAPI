@@ -25,7 +25,7 @@ func ErrorHandler() gin.HandlerFunc {
 				fieldErrs := make([]string, len(e))
 
 				for i, fieldErr := range e {
-					fieldErrs[i] = fmt.Sprintf("%v : %v", fieldErr.Field(), fieldErr.Tag())
+					fieldErrs[i] = fmt.Sprintf("%v", fieldErr.Error())
 				}
 
 				c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": fieldErrs})
