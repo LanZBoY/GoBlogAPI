@@ -10,18 +10,23 @@ func getPostWithCreatorListPipeline(skip, limit int64) (countPipeline, queryPipe
 	pb := pipefactory.NewPipelineBuilder()
 	pb.AddOperations(
 		bson.D{
-			{Key: "$lookup",
+			{
+				Key: "$lookup",
 				Value: bson.D{
 					{Key: "from", Value: "User"},
 					{Key: "let", Value: bson.D{{Key: "userId", Value: "$CreatedBy"}}},
-					{Key: "pipeline",
+					{
+						Key: "pipeline",
 						Value: bson.A{
 							bson.D{
-								{Key: "$match",
+								{
+									Key: "$match",
 									Value: bson.D{
-										{Key: "$expr",
+										{
+											Key: "$expr",
 											Value: bson.D{
-												{Key: "$eq",
+												{
+													Key: "$eq",
 													Value: bson.A{
 														"$_id",
 														"$$userId",
@@ -33,7 +38,8 @@ func getPostWithCreatorListPipeline(skip, limit int64) (countPipeline, queryPipe
 								},
 							},
 							bson.D{
-								{Key: "$project",
+								{
+									Key: "$project",
 									Value: bson.D{
 										{Key: "Password", Value: 0},
 										{Key: "Salt", Value: 0},

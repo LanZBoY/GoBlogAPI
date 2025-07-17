@@ -34,8 +34,8 @@ func (repo *PostRepo) CreatePost(ctx context.Context, postCreate *PostSchema.Pos
 }
 
 func (repo *PostRepo) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, posts []PostModel.PostWithCreatorDocument, err error) {
-	totalPipe, queryPipe := getPostWithCreatorListPipeline(query.Skip, query.Limit)
-	total, err = mongoutils.CountDocumentWithPipeline(ctx, repo.postColletion, totalPipe)
+	countPipe, queryPipe := getPostWithCreatorListPipeline(query.Skip, query.Limit)
+	total, err = mongoutils.CountDocumentWithPipeline(ctx, repo.postColletion, countPipe)
 	if err != nil {
 		return
 	}
@@ -59,10 +59,12 @@ func (repo *PostRepo) GetPostById(ctx context.Context, id primitive.ObjectID) (p
 						Key:   "let",
 						Value: bson.D{{Key: "userId", Value: "$CreatedBy"}},
 					},
-					{Key: "pipeline",
+					{
+						Key: "pipeline",
 						Value: bson.A{
 							bson.D{
-								{Key: "$project",
+								{
+									Key: "$project",
 									Value: bson.D{
 										{Key: "Password", Value: 0},
 										{Key: "Salt", Value: 0},
@@ -76,7 +78,8 @@ func (repo *PostRepo) GetPostById(ctx context.Context, id primitive.ObjectID) (p
 			},
 		},
 		bson.D{
-			{Key: "$unwind",
+			{
+				Key: "$unwind",
 				Value: bson.D{
 					{Key: "path", Value: "$Creator"},
 					{Key: "preserveNullAndEmptyArrays", Value: true},
