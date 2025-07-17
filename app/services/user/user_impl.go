@@ -17,7 +17,7 @@ import (
 )
 
 type UserService struct {
-	userRepo *UserRepo.UserRepo
+	userRepo UserRepo.IUserRepository
 }
 
 func NewUserService(userRepo *UserRepo.UserRepo) *UserService {
@@ -98,7 +98,7 @@ func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.Base
 
 }
 
-func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate UserSchema.UserUpdate) (err error) {
+func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate *UserSchema.UserUpdate) (err error) {
 	oId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return

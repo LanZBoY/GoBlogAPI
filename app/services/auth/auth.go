@@ -15,7 +15,7 @@ import (
 )
 
 type AuthService struct {
-	userRepo *UserRepo.UserRepo
+	userRepo UserRepo.IGetUserByMail
 }
 
 func NewAuthService(userRepo *UserRepo.UserRepo) *AuthService {

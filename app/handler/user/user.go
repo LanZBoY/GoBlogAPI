@@ -11,7 +11,7 @@ import (
 )
 
 type UserRouter struct {
-	userSvc *UserSvc.UserService
+	userSvc UserSvc.IUserService
 }
 
 func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter {
@@ -162,7 +162,7 @@ func (api *UserRouter) UpdateUser(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err := api.userSvc.UpdateUserById(ctx, id, userUpdate); err != nil {
+	if err := api.userSvc.UpdateUserById(ctx, id, &userUpdate); err != nil {
 		c.Error(err)
 		return
 	}

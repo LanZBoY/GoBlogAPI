@@ -17,7 +17,7 @@ import (
 )
 
 type UserRepo struct {
-	userCollection *mongo.Collection
+	userCollection IUserCollection
 }
 
 func NewUserRepo(userCollection *mongo.Collection) *UserRepo {
@@ -73,7 +73,7 @@ func (repo *UserRepo) GetUserByEmail(ctx context.Context, email string, opts ...
 	return &userDoc, nil
 }
 
-func (repo *UserRepo) UpdateUserById(ctx context.Context, id primitive.ObjectID, updateData UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
+func (repo *UserRepo) UpdateUserById(ctx context.Context, id primitive.ObjectID, updateData *UserSchema.UserUpdate, opts ...*options.UpdateOptions) (err error) {
 	_, err = repo.userCollection.UpdateOne(ctx, bson.M{UserModel.FieldId: id}, bson.M{"$set": updateData})
 	return
 }

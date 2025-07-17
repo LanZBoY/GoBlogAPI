@@ -6,7 +6,7 @@ import (
 	AuthRouter "wentee/blog/app/handler/auth"
 	PostRouter "wentee/blog/app/handler/post"
 	UserRouter "wentee/blog/app/handler/user"
-	"wentee/blog/app/model/mongodb"
+	"wentee/blog/app/repo"
 	PostRepo "wentee/blog/app/repo/post"
 	UserRepo "wentee/blog/app/repo/user"
 	AuthSvc "wentee/blog/app/services/auth"
@@ -23,14 +23,14 @@ type Container struct {
 func InitContainer(appCtx *appinit.AppContext) *Container {
 	mainDB := appCtx.MongoClient.Database(config.MOGNO_DATABASE)
 
-	userRepo := UserRepo.NewUserRepo(mainDB.Collection(mongodb.UserCollection))
+	userRepo := UserRepo.NewUserRepo(mainDB.Collection(repo.UserCollection))
 	userSvc := UserService.NewUserService(userRepo)
 	userRouter := UserRouter.NewUserRouter(userSvc)
 
 	authSvc := AuthSvc.NewAuthService(userRepo)
 	authRouter := AuthRouter.NewAuthRouter(authSvc)
 
-	poseRepo := PostRepo.NewPostRepo(mainDB.Collection(mongodb.PostCollection))
+	poseRepo := PostRepo.NewPostRepo(mainDB.Collection(repo.PostCollection))
 	postSvc := PostSvc.NewPostService(poseRepo)
 	postRouter := PostRouter.NewPostRouter(postSvc)
 
