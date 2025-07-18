@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,7 +15,7 @@ type MockCollection struct {
 	mock.Mock
 }
 
-func appendCallArgs[T any](fixed []any, variadic []T) []any {
+func AppendCallArgs[T any](fixed []any, variadic []T) []any {
 	out := make([]any, 0, len(fixed)+len(variadic))
 
 	out = append(out, fixed...)
@@ -26,45 +27,45 @@ func appendCallArgs[T any](fixed []any, variadic []T) []any {
 }
 
 func (m *MockCollection) CountDocuments(ctx context.Context, filter any, opts ...*options.CountOptions) (int64, error) {
-	params := appendCallArgs([]any{ctx, filter}, opts)
+	params := AppendCallArgs([]any{ctx, filter}, opts)
 	args := m.Called(params...)
 	return args.Get(0).(int64), args.Error(1)
 }
 
 func (m *MockCollection) Find(ctx context.Context, filter any, opts ...*options.FindOptions) (imongo.Cursor, error) {
-	params := appendCallArgs([]any{ctx, filter}, opts)
+	params := AppendCallArgs([]any{ctx, filter}, opts)
 	args := m.Called(params...)
 	return args.Get(0).(imongo.Cursor), args.Error(1)
 }
 
 func (m *MockCollection) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) imongo.SingleResult {
-	params := appendCallArgs([]any{ctx, filter}, opts)
+	params := AppendCallArgs([]any{ctx, filter}, opts)
 	args := m.Called(params...)
 	return args.Get(0).(imongo.SingleResult)
 }
 
 func (m *MockCollection) UpdateOne(ctx context.Context, filter any, updateDoc any, opts ...*options.UpdateOptions) (imongo.UpdateResult, error) {
-	params := appendCallArgs([]any{ctx, filter, updateDoc}, opts)
+	params := AppendCallArgs([]any{ctx, filter, updateDoc}, opts)
 	args := m.Called(params...)
 
 	return args.Get(0).(imongo.UpdateResult), args.Error(1)
 }
 
 func (m *MockCollection) DeleteOne(ctx context.Context, filter any, opts ...*options.DeleteOptions) (imongo.DeleteResult, error) {
-	params := appendCallArgs([]any{ctx, filter}, opts)
+	params := AppendCallArgs([]any{ctx, filter}, opts)
 	args := m.Called(params...)
 	return args.Get(0).(imongo.DeleteResult), args.Error(1)
 }
 
 func (m *MockCollection) InsertOne(ctx context.Context, data any, opts ...*options.InsertOneOptions) (imongo.InsertOneResult, error) {
-	params := appendCallArgs([]any{ctx, data}, opts)
+	params := AppendCallArgs([]any{ctx, data}, opts)
 	args := m.Called(params...)
 
 	return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
 }
 
 func (m *MockCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (imongo.Cursor, error) {
-	params := appendCallArgs([]any{ctx, pipeline}, opts)
+	params := AppendCallArgs([]any{ctx, pipeline}, opts)
 	args := m.Called(params...)
 	return args.Get(0).(imongo.Cursor), args.Error(1)
 }
@@ -110,4 +111,14 @@ type MockMongoUtils struct {
 func (m *MockMongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator imongo.IAggregate, countPipeline bson.A) (total int64, err error) {
 	args := m.Called(ctx, aggregator, countPipeline)
 	return args.Get(0).(int64), args.Error(1)
+}
+
+type MockObjectIDCreator struct {
+	mock.Mock
+}
+
+// ObjectIDFromHex implements imongo.IObjectIdCreator.
+func (m *MockObjectIDCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) {
+	args := m.Called(s)
+	return args.Get(0).(primitive.ObjectID), args.Error(1)
 }

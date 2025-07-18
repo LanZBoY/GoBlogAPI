@@ -103,17 +103,19 @@
 				
 				<option value="file23">wentee/blog/app/services/post/post_impl.go (0.0%)</option>
 				
-				<option value="file24">wentee/blog/app/services/user/user_impl.go (0.0%)</option>
+				<option value="file24">wentee/blog/app/services/user/user_impl.go (55.6%)</option>
 				
 				<option value="file25">wentee/blog/app/testutils/mongo_utils.go (0.0%)</option>
 				
-				<option value="file26">wentee/blog/app/utils/mongo/mongoutils/count.go (0.0%)</option>
+				<option value="file26">wentee/blog/app/testutils/password_utils.go (0.0%)</option>
 				
-				<option value="file27">wentee/blog/app/utils/mongo/pipefactory/pipeline_factory.go (0.0%)</option>
+				<option value="file27">wentee/blog/app/utils/mongo/mongoutils/count.go (0.0%)</option>
 				
-				<option value="file28">wentee/blog/app/utils/reqcontext/context_key.go (0.0%)</option>
+				<option value="file28">wentee/blog/app/utils/mongo/pipefactory/pipeline_factory.go (0.0%)</option>
 				
-				<option value="file29">wentee/blog/app/utils/security.go (0.0%)</option>
+				<option value="file29">wentee/blog/app/utils/reqcontext/context_key.go (0.0%)</option>
+				
+				<option value="file30">wentee/blog/app/utils/security.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -193,6 +195,7 @@ import (
         AuthSvc "wentee/blog/app/services/auth"
         PostSvc "wentee/blog/app/services/post"
         UserService "wentee/blog/app/services/user"
+        "wentee/blog/app/utils"
         "wentee/blog/app/utils/mongo/mongoutils"
 )
 
@@ -205,12 +208,14 @@ type Container struct {
 func InitContainer(appCtx *appinit.AppContext) *Container <span class="cov0" title="0">{
         mainDB := appCtx.MongoClient.Database(config.MOGNO_DATABASE)
         docCounter := &amp;mongoutils.MongoUtils{}
+        passwordUtils := &amp;utils.PasswordUtils{}
+        objectCreator := &amp;mongoutils.ObjectIdCreator{}
 
         userRepo := UserRepo.NewUserRepo(&amp;UserRepo.UserCollectionAdapter{Collection: mainDB.Collection(repo.UserCollection)})
-        userSvc := UserService.NewUserService(userRepo)
+        userSvc := UserService.NewUserService(userRepo, passwordUtils, objectCreator)
         userRouter := UserRouter.NewUserRouter(userSvc)
 
-        authSvc := AuthSvc.NewAuthService(userRepo)
+        authSvc := AuthSvc.NewAuthService(userRepo, passwordUtils)
         authRouter := AuthRouter.NewAuthRouter(authSvc)
 
         poseRepo := PostRepo.NewPostRepo(&amp;PostRepo.PostCollectionAdapter{Collection: mainDB.Collection(repo.PostCollection)}, docCounter)
@@ -1989,12 +1994,14 @@ import (
 )
 
 type AuthService struct {
-        userRepo UserRepo.IGetUserByMail
+        userRepo      UserRepo.IGetUserByMail
+        passwordUtils utils.IPasswrodUtils
 }
 
-func NewAuthService(userRepo *UserRepo.UserRepo) *AuthService <span class="cov0" title="0">{
+func NewAuthService(userRepo *UserRepo.UserRepo, passwordUtils utils.IPasswrodUtils) *AuthService <span class="cov0" title="0">{
         return &amp;AuthService{
-                userRepo: userRepo,
+                userRepo:      userRepo,
+                passwordUtils: passwordUtils,
         }
 }</span>
 
@@ -2006,7 +2013,7 @@ func (authSvc *AuthService) TryLogin(ctx context.Context, loginInfo *AuthSchema.
                 return
         }</span>
 
-        <span class="cov0" title="0">if !utils.VerifyPassword(userDoc.Password, loginInfo.Password, userDoc.Salt) </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if !authSvc.passwordUtils.VerifyPassword(userDoc.Password, loginInfo.Password, userDoc.Salt) </span><span class="cov0" title="0">{
                 err = apperror.New(http.StatusNotFound, errcode.USER_NOT_FOUND, nil)
                 return
         }</span>
@@ -2131,68 +2138,72 @@ import (
         "wentee/blog/app/schema/basemodel"
         UserSchema "wentee/blog/app/schema/user"
         "wentee/blog/app/utils"
+        "wentee/blog/app/utils/mongo/imongo"
 
         "go.mongodb.org/mongo-driver/bson"
-        "go.mongodb.org/mongo-driver/bson/primitive"
         "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserService struct {
-        userRepo UserRepo.IUserRepository
+        userRepo      UserRepo.IUserRepository
+        passwordUtils utils.IPasswrodUtils
+        objectCreator imongo.IObjectIdCreator
 }
 
-func NewUserService(userRepo *UserRepo.UserRepo) *UserService <span class="cov0" title="0">{
+func NewUserService(userRepo UserRepo.IUserRepository, passwordUtils utils.IPasswrodUtils, objectCreator imongo.IObjectIdCreator) *UserService <span class="cov8" title="1">{
         return &amp;UserService{
-                userRepo: userRepo,
+                userRepo:      userRepo,
+                passwordUtils: passwordUtils,
+                objectCreator: objectCreator,
         }
 }</span>
 
-func (svc *UserService) CountUsers(ctx context.Context) (total int64, err error) <span class="cov0" title="0">{
+func (svc *UserService) CountUsers(ctx context.Context) (total int64, err error) <span class="cov8" title="1">{
         return svc.userRepo.CountUsers(ctx)
 }</span>
 
-func (svc *UserService) RegistryUser(ctx context.Context, createUser *UserSchema.UserCreate) error <span class="cov0" title="0">{
+func (svc *UserService) RegistryUser(ctx context.Context, createUser *UserSchema.UserCreate) error <span class="cov8" title="1">{
 
-        if user, _ := svc.userRepo.GetUserByEmail(ctx, createUser.Email); user != nil </span><span class="cov0" title="0">{
+        if user, _ := svc.userRepo.GetUserByEmail(ctx, createUser.Email); user != nil </span><span class="cov8" title="1">{
                 return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, nil)
         }</span>
 
-        <span class="cov0" title="0">salt, err := utils.GenerateSalt(32)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">salt, err := svc.passwordUtils.GenerateSalt(32)
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">hashedPasswroed, err := utils.HashPassword(createUser.Password, salt)
+        <span class="cov8" title="1">hashedPasswroed, err := svc.passwordUtils.HashPassword(createUser.Password, salt)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">if err := svc.userRepo.CreateUser(ctx, &amp;UserModel.UserDocument{
+        <span class="cov8" title="1">if err := svc.userRepo.CreateUser(ctx, &amp;UserModel.UserDocument{
                 Email:    createUser.Email,
                 Username: createUser.Username,
                 Password: hashedPasswroed,
                 Salt:     salt,
-        }); err != nil </span><span class="cov0" title="0">{
+        }); err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
-func (svc *UserService) GetUserById(ctx context.Context, id string) (*UserSchema.UserInfo, error) <span class="cov0" title="0">{
-        oId, err := primitive.ObjectIDFromHex(id)
-        if err != nil </span><span class="cov0" title="0">{
+func (svc *UserService) GetUserById(ctx context.Context, id string) (*UserSchema.UserInfo, error) <span class="cov8" title="1">{
+        oId, err := svc.objectCreator.ObjectIDFromHex(id)
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">userDoc, err := svc.userRepo.GetUserById(ctx, oId, options.FindOne().SetProjection(bson.M{UserModel.FieldPassword: 0}))
+        <span class="cov8" title="1">userDoc, err := svc.userRepo.GetUserById(ctx, oId, options.FindOne().SetProjection(bson.M{UserModel.FieldPassword: 0}))
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">return &amp;UserSchema.UserInfo{
+        <span class="cov8" title="1">return &amp;UserSchema.UserInfo{
                 Id:       userDoc.Id,
                 Email:    userDoc.Email,
                 Username: userDoc.Username,
@@ -2220,7 +2231,7 @@ func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.Base
 }
 
 func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate *UserSchema.UserUpdate) (err error) <span class="cov0" title="0">{
-        oId, err := primitive.ObjectIDFromHex(id)
+        oId, err := svc.objectCreator.ObjectIDFromHex(id)
         if err != nil </span><span class="cov0" title="0">{
                 return
         }</span>
@@ -2229,7 +2240,7 @@ func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdat
 }
 
 func (svc *UserService) DeleteUserById(ctx context.Context, id string) (err error) <span class="cov0" title="0">{
-        oid, err := primitive.ObjectIDFromHex(id)
+        oid, err := svc.objectCreator.ObjectIDFromHex(id)
         if err != nil </span><span class="cov0" title="0">{
                 return
         }</span>
@@ -2246,6 +2257,7 @@ import (
 
         "github.com/stretchr/testify/mock"
         "go.mongodb.org/mongo-driver/bson"
+        "go.mongodb.org/mongo-driver/bson/primitive"
         "go.mongodb.org/mongo-driver/mongo"
         "go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -2254,7 +2266,7 @@ type MockCollection struct {
         mock.Mock
 }
 
-func appendCallArgs[T any](fixed []any, variadic []T) []any <span class="cov0" title="0">{
+func AppendCallArgs[T any](fixed []any, variadic []T) []any <span class="cov0" title="0">{
         out := make([]any, 0, len(fixed)+len(variadic))
 
         out = append(out, fixed...)
@@ -2266,45 +2278,45 @@ func appendCallArgs[T any](fixed []any, variadic []T) []any <span class="cov0" t
 }
 
 func (m *MockCollection) CountDocuments(ctx context.Context, filter any, opts ...*options.CountOptions) (int64, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, filter}, opts)
+        params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(int64), args.Error(1)
 }</span>
 
 func (m *MockCollection) Find(ctx context.Context, filter any, opts ...*options.FindOptions) (imongo.Cursor, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, filter}, opts)
+        params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.Cursor), args.Error(1)
 }</span>
 
 func (m *MockCollection) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) imongo.SingleResult <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, filter}, opts)
+        params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.SingleResult)
 }</span>
 
 func (m *MockCollection) UpdateOne(ctx context.Context, filter any, updateDoc any, opts ...*options.UpdateOptions) (imongo.UpdateResult, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, filter, updateDoc}, opts)
+        params := AppendCallArgs([]any{ctx, filter, updateDoc}, opts)
         args := m.Called(params...)
 
         return args.Get(0).(imongo.UpdateResult), args.Error(1)
 }</span>
 
 func (m *MockCollection) DeleteOne(ctx context.Context, filter any, opts ...*options.DeleteOptions) (imongo.DeleteResult, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, filter}, opts)
+        params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.DeleteResult), args.Error(1)
 }</span>
 
 func (m *MockCollection) InsertOne(ctx context.Context, data any, opts ...*options.InsertOneOptions) (imongo.InsertOneResult, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, data}, opts)
+        params := AppendCallArgs([]any{ctx, data}, opts)
         args := m.Called(params...)
 
         return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
 }</span>
 
 func (m *MockCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (imongo.Cursor, error) <span class="cov0" title="0">{
-        params := appendCallArgs([]any{ctx, pipeline}, opts)
+        params := AppendCallArgs([]any{ctx, pipeline}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.Cursor), args.Error(1)
 }</span>
@@ -2351,15 +2363,54 @@ func (m *MockMongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregat
         args := m.Called(ctx, aggregator, countPipeline)
         return args.Get(0).(int64), args.Error(1)
 }</span>
+
+type MockObjectIDCreator struct {
+        mock.Mock
+}
+
+// ObjectIDFromHex implements imongo.IObjectIdCreator.
+func (m *MockObjectIDCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) <span class="cov0" title="0">{
+        args := m.Called(s)
+        return args.Get(0).(primitive.ObjectID), args.Error(1)
+}</span>
 </pre>
 		
-		<pre class="file" id="file26" style="display: none">package mongoutils
+		<pre class="file" id="file26" style="display: none">package testutils
+
+import "github.com/stretchr/testify/mock"
+
+type MockPasswordUtils struct {
+        mock.Mock
+}
+
+// GenerateSalt implements utils.IPasswrodUtils.
+func (m *MockPasswordUtils) GenerateSalt(length int) (string, error) <span class="cov0" title="0">{
+        args := m.Called(length)
+
+        return args.String(0), args.Error(1)
+}</span>
+
+// HashPassword implements utils.IPasswrodUtils.
+func (m *MockPasswordUtils) HashPassword(password string, salt string) (string, error) <span class="cov0" title="0">{
+        args := m.Called(password, salt)
+        return args.String(0), args.Error(1)
+}</span>
+
+// VerifyPassword implements utils.IPasswrodUtils.
+func (m *MockPasswordUtils) VerifyPassword(hashedPassword string, password string, salt string) bool <span class="cov0" title="0">{
+        args := m.Called(hashedPassword, password, salt)
+        return args.Bool(0)
+}</span>
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package mongoutils
 
 import (
         "context"
         "wentee/blog/app/utils/mongo/imongo"
 
         "go.mongodb.org/mongo-driver/bson"
+        "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type DocumentCounter interface {
@@ -2387,9 +2438,17 @@ func (m *MongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator i
         }</span>
         <span class="cov0" title="0">return</span>
 }
+
+type ObjectIdCreator struct {
+}
+
+// ObjectIDFromHex implements imongo.IObjectIdCreator.
+func (o *ObjectIdCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) <span class="cov0" title="0">{
+        return primitive.ObjectIDFromHex(s)
+}</span>
 </pre>
 		
-		<pre class="file" id="file27" style="display: none">package pipefactory
+		<pre class="file" id="file28" style="display: none">package pipefactory
 
 import (
         "go.mongodb.org/mongo-driver/bson"
@@ -2454,7 +2513,7 @@ func (pb *PipelineBuilder) BuildQeuryPipeline() bson.A <span class="cov0" title=
 }
 </pre>
 		
-		<pre class="file" id="file28" style="display: none">package reqcontext
+		<pre class="file" id="file29" style="display: none">package reqcontext
 
 import (
         "net/http"
@@ -2483,7 +2542,7 @@ func GetUserInfo(c *gin.Context) (userInfo AuthSchema.JWTUserInfo, err error) <s
 }
 </pre>
 		
-		<pre class="file" id="file29" style="display: none">package utils
+		<pre class="file" id="file30" style="display: none">package utils
 
 import (
         "crypto/rand"
@@ -2492,7 +2551,16 @@ import (
         "golang.org/x/crypto/bcrypt"
 )
 
-func GenerateSalt(length int) (string, error) <span class="cov0" title="0">{
+type IPasswrodUtils interface {
+        GenerateSalt(length int) (string, error)
+        HashPassword(password string, salt string) (string, error)
+        VerifyPassword(hashedPassword string, password string, salt string) bool
+}
+
+type PasswordUtils struct {
+}
+
+func (pu *PasswordUtils) GenerateSalt(length int) (string, error) <span class="cov0" title="0">{
         placeBytes := make([]byte, length)
 
         if _, err := rand.Read(placeBytes); err != nil </span><span class="cov0" title="0">{
@@ -2502,14 +2570,14 @@ func GenerateSalt(length int) (string, error) <span class="cov0" title="0">{
         <span class="cov0" title="0">return hex.EncodeToString(placeBytes), nil</span>
 }
 
-func HashPassword(password string, salt string) (string, error) <span class="cov0" title="0">{
+func (pu *PasswordUtils) HashPassword(password string, salt string) (string, error) <span class="cov0" title="0">{
         salted := password + salt
         hashBytes, err := bcrypt.GenerateFromPassword([]byte(salted), bcrypt.DefaultCost)
 
         return string(hashBytes), err
 }</span>
 
-func VerifyPassword(hashedPassword string, password string, salt string) bool <span class="cov0" title="0">{
+func (pu *PasswordUtils) VerifyPassword(hashedPassword string, password string, salt string) bool <span class="cov0" title="0">{
         salted := password + salt
 
         if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(salted)); err != nil </span><span class="cov0" title="0">{

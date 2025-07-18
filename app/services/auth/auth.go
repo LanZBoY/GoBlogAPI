@@ -15,12 +15,14 @@ import (
 )
 
 type AuthService struct {
-	userRepo UserRepo.IGetUserByMail
+	userRepo      UserRepo.IGetUserByMail
+	passwordUtils utils.IPasswrodUtils
 }
 
-func NewAuthService(userRepo *UserRepo.UserRepo) *AuthService {
+func NewAuthService(userRepo *UserRepo.UserRepo, passwordUtils utils.IPasswrodUtils) *AuthService {
 	return &AuthService{
-		userRepo: userRepo,
+		userRepo:      userRepo,
+		passwordUtils: passwordUtils,
 	}
 }
 
@@ -32,7 +34,7 @@ func (authSvc *AuthService) TryLogin(ctx context.Context, loginInfo *AuthSchema.
 		return
 	}
 
-	if !utils.VerifyPassword(userDoc.Password, loginInfo.Password, userDoc.Salt) {
+	if !authSvc.passwordUtils.VerifyPassword(userDoc.Password, loginInfo.Password, userDoc.Salt) {
 		err = apperror.New(http.StatusNotFound, errcode.USER_NOT_FOUND, nil)
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"wentee/blog/app/utils/mongo/imongo"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type DocumentCounter interface {
@@ -31,4 +32,12 @@ func (m *MongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator i
 		total = int64(countResult[0]["total"].(int32))
 	}
 	return
+}
+
+type ObjectIdCreator struct {
+}
+
+// ObjectIDFromHex implements imongo.IObjectIdCreator.
+func (o *ObjectIdCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) {
+	return primitive.ObjectIDFromHex(s)
 }

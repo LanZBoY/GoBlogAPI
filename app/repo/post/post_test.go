@@ -116,21 +116,24 @@ func TestListPosts(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockCol := new(testutils.MockCollection)
-		mockUtils := new(testutils.MockMongoUtils)
-		mockCursor := new(testutils.MockCursor)
+		t.Run(tt.name, func(t *testing.T) {
+			mockCol := new(testutils.MockCollection)
+			mockUtils := new(testutils.MockMongoUtils)
+			mockCursor := new(testutils.MockCursor)
 
-		tt.mockSetup(tt.ctx, tt.query, mockCol, mockUtils, mockCursor)
+			tt.mockSetup(tt.ctx, tt.query, mockCol, mockUtils, mockCursor)
 
-		repo := PostRepo.NewPostRepo(mockCol, mockUtils)
+			repo := PostRepo.NewPostRepo(mockCol, mockUtils)
 
-		total, _, err := repo.ListPosts(tt.ctx, tt.query)
+			total, _, err := repo.ListPosts(tt.ctx, tt.query)
 
-		if tt.wantErr {
-			assert.Error(t, err)
-		} else {
-			assert.Equal(t, tt.wantTotal, total)
-		}
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, tt.wantTotal, total)
+			}
+
+		})
 
 	}
 }
@@ -172,20 +175,23 @@ func TestGetPostById(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mockCol := new(testutils.MockCollection)
-		mockCursor := new(testutils.MockCursor)
-		mockUtils := new(testutils.MockMongoUtils)
-		tt.mockSetup(tt.ctx, tt.id, mockCol, mockCursor)
+		t.Run(tt.name, func(t *testing.T) {
+			mockCol := new(testutils.MockCollection)
+			mockCursor := new(testutils.MockCursor)
+			mockUtils := new(testutils.MockMongoUtils)
+			tt.mockSetup(tt.ctx, tt.id, mockCol, mockCursor)
 
-		repo := PostRepo.NewPostRepo(mockCol, mockUtils)
+			repo := PostRepo.NewPostRepo(mockCol, mockUtils)
 
-		_, err := repo.GetPostById(tt.ctx, tt.id)
+			_, err := repo.GetPostById(tt.ctx, tt.id)
 
-		if tt.wantErr {
-			assert.Error(t, err)
-		} else {
-			assert.NoError(t, err)
-		}
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+		})
 	}
 }
 

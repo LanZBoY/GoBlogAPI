@@ -299,16 +299,18 @@ func TestUpdateUserById(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mc := new(testutils.MockCollection)
-		tt.mockSetup(mc, tt.ctx, tt.id, tt.updateData)
+		t.Run(tt.name, func(t *testing.T) {
+			mc := new(testutils.MockCollection)
+			tt.mockSetup(mc, tt.ctx, tt.id, tt.updateData)
 
-		repo := &UserRepo.UserRepo{
-			UserCollection: mc,
-		}
+			repo := &UserRepo.UserRepo{
+				UserCollection: mc,
+			}
 
-		err := repo.UpdateUserById(tt.ctx, tt.id, tt.updateData)
+			err := repo.UpdateUserById(tt.ctx, tt.id, tt.updateData)
 
-		assert.NoError(t, err)
+			assert.NoError(t, err)
+		})
 	}
 
 }
@@ -331,15 +333,17 @@ func TestDeleteUserById(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		mc := new(testutils.MockCollection)
-		tt.mockSetup(mc, tt.ctx, tt.id)
+		t.Run(tt.name, func(t *testing.T) {
+			mc := new(testutils.MockCollection)
+			tt.mockSetup(mc, tt.ctx, tt.id)
 
-		repo := &UserRepo.UserRepo{
-			UserCollection: mc,
-		}
+			repo := &UserRepo.UserRepo{
+				UserCollection: mc,
+			}
 
-		err := repo.DeleteUserById(tt.ctx, tt.id)
+			err := repo.DeleteUserById(tt.ctx, tt.id)
 
-		assert.NoError(t, err)
+			assert.NoError(t, err)
+		})
 	}
 }

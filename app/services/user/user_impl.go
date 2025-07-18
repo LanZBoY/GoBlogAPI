@@ -10,19 +10,23 @@ import (
 	"wentee/blog/app/schema/basemodel"
 	UserSchema "wentee/blog/app/schema/user"
 	"wentee/blog/app/utils"
+	"wentee/blog/app/utils/mongo/imongo"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserService struct {
-	userRepo UserRepo.IUserRepository
+	userRepo      UserRepo.IUserRepository
+	passwordUtils utils.IPasswrodUtils
+	objectCreator imongo.IObjectIdCreator
 }
 
-func NewUserService(userRepo *UserRepo.UserRepo) *UserService {
+func NewUserService(userRepo UserRepo.IUserRepository, passwordUtils utils.IPasswrodUtils, objectCreator imongo.IObjectIdCreator) *UserService {
 	return &UserService{
-		userRepo: userRepo,
+		userRepo:      userRepo,
+		passwordUtils: passwordUtils,
+		objectCreator: objectCreator,
 	}
 }
 
@@ -36,12 +40,12 @@ func (svc *UserService) RegistryUser(ctx context.Context, createUser *UserSchema
 		return apperror.New(http.StatusBadRequest, errcode.USER_EXIST, nil)
 	}
 
-	salt, err := utils.GenerateSalt(32)
+	salt, err := svc.passwordUtils.GenerateSalt(32)
 	if err != nil {
 		return err
 	}
 
-	hashedPasswroed, err := utils.HashPassword(createUser.Password, salt)
+	hashedPasswroed, err := svc.passwordUtils.HashPassword(createUser.Password, salt)
 
 	if err != nil {
 		return err
@@ -60,7 +64,7 @@ func (svc *UserService) RegistryUser(ctx context.Context, createUser *UserSchema
 }
 
 func (svc *UserService) GetUserById(ctx context.Context, id string) (*UserSchema.UserInfo, error) {
-	oId, err := primitive.ObjectIDFromHex(id)
+	oId, err := svc.objectCreator.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +103,7 @@ func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.Base
 }
 
 func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate *UserSchema.UserUpdate) (err error) {
-	oId, err := primitive.ObjectIDFromHex(id)
+	oId, err := svc.objectCreator.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
@@ -108,7 +112,7 @@ func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdat
 }
 
 func (svc *UserService) DeleteUserById(ctx context.Context, id string) (err error) {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := svc.objectCreator.ObjectIDFromHex(id)
 	if err != nil {
 		return
 	}
