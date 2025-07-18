@@ -10,16 +10,17 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type PostRepo struct {
 	postColletion IPostCollection
+	docCounter    mongoutils.DocumentCounter
 }
 
-func NewPostRepo(postColletion *mongo.Collection) *PostRepo {
+func NewPostRepo(postColletion IPostCollection, docCounter mongoutils.DocumentCounter) *PostRepo {
 	return &PostRepo{
 		postColletion: postColletion,
+		docCounter:    docCounter,
 	}
 }
 
@@ -35,7 +36,7 @@ func (repo *PostRepo) CreatePost(ctx context.Context, postCreate *PostSchema.Pos
 
 func (repo *PostRepo) ListPosts(ctx context.Context, query *basemodel.BaseQuery) (total int64, posts []PostModel.PostWithCreatorDocument, err error) {
 	countPipe, queryPipe := getPostWithCreatorListPipeline(query.Skip, query.Limit)
-	total, err = mongoutils.CountDocumentWithPipeline(ctx, repo.postColletion, countPipe)
+	total, err = repo.docCounter.CountDocumentWithPipeline(ctx, repo.postColletion, countPipe)
 	if err != nil {
 		return
 	}

@@ -2,12 +2,19 @@ package mongoutils
 
 import (
 	"context"
-	"wentee/blog/app/utils/mongo/icollection"
+	"wentee/blog/app/utils/mongo/imongo"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func CountDocumentWithPipeline(ctx context.Context, aggregator icollection.IAggregate, countPipeline bson.A) (total int64, err error) {
+type DocumentCounter interface {
+	CountDocumentWithPipeline(ctx context.Context, aggregator imongo.IAggregate, countPipeline bson.A) (total int64, err error)
+}
+
+type MongoUtils struct {
+}
+
+func (m *MongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator imongo.IAggregate, countPipeline bson.A) (total int64, err error) {
 	cursor, err := aggregator.Aggregate(ctx, countPipeline)
 
 	if err != nil {

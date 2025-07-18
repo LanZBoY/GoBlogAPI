@@ -12,6 +12,7 @@ import (
 	AuthSvc "wentee/blog/app/services/auth"
 	PostSvc "wentee/blog/app/services/post"
 	UserService "wentee/blog/app/services/user"
+	"wentee/blog/app/utils/mongo/mongoutils"
 )
 
 type Container struct {
@@ -22,15 +23,16 @@ type Container struct {
 
 func InitContainer(appCtx *appinit.AppContext) *Container {
 	mainDB := appCtx.MongoClient.Database(config.MOGNO_DATABASE)
+	docCounter := &mongoutils.MongoUtils{}
 
-	userRepo := UserRepo.NewUserRepo(mainDB.Collection(repo.UserCollection))
+	userRepo := UserRepo.NewUserRepo(&UserRepo.UserCollectionAdapter{Collection: mainDB.Collection(repo.UserCollection)})
 	userSvc := UserService.NewUserService(userRepo)
 	userRouter := UserRouter.NewUserRouter(userSvc)
 
 	authSvc := AuthSvc.NewAuthService(userRepo)
 	authRouter := AuthRouter.NewAuthRouter(authSvc)
 
-	poseRepo := PostRepo.NewPostRepo(mainDB.Collection(repo.PostCollection))
+	poseRepo := PostRepo.NewPostRepo(&PostRepo.PostCollectionAdapter{Collection: mainDB.Collection(repo.PostCollection)}, docCounter)
 	postSvc := PostSvc.NewPostService(poseRepo)
 	postRouter := PostRouter.NewPostRouter(postSvc)
 
