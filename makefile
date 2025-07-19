@@ -11,4 +11,4 @@ generate_test_report:
 	@echo "Generating Report..."
 	go tool cover -html=coverReport.out -o coverReport.html
 
-test_and_genreate_report: test generate_test_report
+test_and_generate_report: test generate_test_report
