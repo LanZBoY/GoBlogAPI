@@ -7,8 +7,8 @@ import (
 )
 
 type PostCreate struct {
-	Title   string  `json:"title" bind:"rquired"`
-	Content *string `json:"content" bind:"omitempty"`
+	Title   string  `json:"title" binding:"required"`
+	Content *string `json:"content" binding:"omitempty"`
 }
 
 type PostUpdate struct {
