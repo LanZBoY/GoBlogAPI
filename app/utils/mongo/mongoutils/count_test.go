@@ -4,18 +4,19 @@ import (
 	"context"
 	"testing"
 
+	"wentee/blog/app/testutils"
+	"wentee/blog/app/utils/mongo/imongo"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"wentee/blog/app/testutils"
-	"wentee/blog/app/utils/mongo/imongo"
 )
 
 type mockAggregator struct{ mock.Mock }
 
 func (m *mockAggregator) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (imongo.Cursor, error) {
-	args := m.Called(append([]any{ctx, pipeline}, opts...)...)
+	args := m.Called(testutils.AppendCallArgs([]any{ctx, pipeline}, opts)...)
 	return args.Get(0).(imongo.Cursor), args.Error(1)
 }
 

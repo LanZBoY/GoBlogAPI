@@ -8,10 +8,11 @@ import (
 	"wentee/blog/app/schema/basemodel"
 	PostSchema "wentee/blog/app/schema/post"
 
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 type mockPostRepo struct{ mock.Mock }
@@ -62,7 +63,18 @@ func TestPostService_ListPosts(t *testing.T) {
 	svc := &PostService{postRepo: repo}
 	query := &basemodel.BaseQuery{Skip: 0, Limit: 1}
 	oid := primitive.NewObjectID()
-	repo.On("ListPosts", mock.Anything, query).Return(int64(1), []PostModel.PostWithCreatorDocument{{Id: oid, Title: "t", Creator: UserModel.UserDocument{Id: oid, Username: "u"}}}, nil)
+	repo.On("ListPosts", mock.Anything, query).Return(int64(1), []PostModel.PostWithCreatorDocument{
+		{
+			PostDocument: PostModel.PostDocument{
+				Id:    oid,
+				Title: "t",
+			},
+			Creator: UserModel.UserDocument{
+				Id:       oid,
+				Username: "u",
+			},
+		},
+	}, nil)
 
 	total, posts, err := svc.ListPosts(context.TODO(), query)
 	assert.NoError(t, err)
