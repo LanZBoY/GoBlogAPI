@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"wentee/blog/app/schema/apperror"
 	"wentee/blog/app/schema/apperror/errcode"
-	"wentee/blog/app/schema/auth"
 	AuthSchema "wentee/blog/app/schema/auth"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +17,7 @@ func GetUserInfo(c *gin.Context) (userInfo AuthSchema.JWTUserInfo, err error) {
 		err = apperror.New(http.StatusBadRequest, errcode.USER_NOT_FOUND, nil)
 		return
 	}
-	userInfo, ok = userInfoAny.(auth.JWTUserInfo)
+	userInfo, ok = userInfoAny.(AuthSchema.JWTUserInfo)
 	if !ok {
 		err = apperror.New(http.StatusInternalServerError, errcode.TYPE_ASSERTION_ERROR, nil)
 		return
