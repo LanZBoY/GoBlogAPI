@@ -20,7 +20,7 @@ func GetUserInfo(c *gin.Context) (userInfo AuthSchema.JWTUserInfo, err error) {
 	}
 	userInfo, ok = userInfoAny.(auth.JWTUserInfo)
 	if !ok {
-		err = apperror.New(http.StatusInternalServerError, errcode.TPYE_ASSERTION_ERROR, nil)
+		err = apperror.New(http.StatusInternalServerError, errcode.TYPE_ASSERTION_ERROR, nil)
 		return
 	}
 	return

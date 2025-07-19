@@ -18,11 +18,11 @@ import (
 
 type UserService struct {
 	userRepo      UserRepo.IUserRepository
-	passwordUtils utils.IPasswrodUtils
+	passwordUtils utils.IPasswordUtils
 	objectCreator imongo.IObjectIdCreator
 }
 
-func NewUserService(userRepo UserRepo.IUserRepository, passwordUtils utils.IPasswrodUtils, objectCreator imongo.IObjectIdCreator) *UserService {
+func NewUserService(userRepo UserRepo.IUserRepository, passwordUtils utils.IPasswordUtils, objectCreator imongo.IObjectIdCreator) *UserService {
 	return &UserService{
 		userRepo:      userRepo,
 		passwordUtils: passwordUtils,
