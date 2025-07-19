@@ -6,20 +6,20 @@ type MockPasswordUtils struct {
 	mock.Mock
 }
 
-// GenerateSalt implements utils.IPasswrodUtils.
+// GenerateSalt implements utils.IPasswordUtils.
 func (m *MockPasswordUtils) GenerateSalt(length int) (string, error) {
 	args := m.Called(length)
 
 	return args.String(0), args.Error(1)
 }
 
-// HashPassword implements utils.IPasswrodUtils.
+// HashPassword implements utils.IPasswordUtils.
 func (m *MockPasswordUtils) HashPassword(password string, salt string) (string, error) {
 	args := m.Called(password, salt)
 	return args.String(0), args.Error(1)
 }
 
-// VerifyPassword implements utils.IPasswrodUtils.
+// VerifyPassword implements utils.IPasswordUtils.
 func (m *MockPasswordUtils) VerifyPassword(hashedPassword string, password string, salt string) bool {
 	args := m.Called(hashedPassword, password, salt)
 	return args.Bool(0)

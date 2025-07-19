@@ -16,10 +16,10 @@ import (
 
 type AuthService struct {
 	userRepo      UserRepo.IGetUserByMail
-	passwordUtils utils.IPasswrodUtils
+	passwordUtils utils.IPasswordUtils
 }
 
-func NewAuthService(userRepo *UserRepo.UserRepo, passwordUtils utils.IPasswrodUtils) *AuthService {
+func NewAuthService(userRepo *UserRepo.UserRepo, passwordUtils utils.IPasswordUtils) *AuthService {
 	return &AuthService{
 		userRepo:      userRepo,
 		passwordUtils: passwordUtils,

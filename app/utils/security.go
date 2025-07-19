@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type IPasswrodUtils interface {
+type IPasswordUtils interface {
 	GenerateSalt(length int) (string, error)
 	HashPassword(password string, salt string) (string, error)
 	VerifyPassword(hashedPassword string, password string, salt string) bool

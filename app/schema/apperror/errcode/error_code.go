@@ -1,7 +1,7 @@
 package errcode
 
 const (
-	TPYE_ASSERTION_ERROR = "TYPE_ASSETION_ERROR"
+	TYPE_ASSERTION_ERROR = "TYPE_ASSERTION_ERROR"
 	USER_EXIST           = "USER_EXIST"
 	USER_NOT_FOUND       = "USER_NOT_FOUND"
 	INVALID_TOKEN        = "INVALID_TOKEN"
@@ -15,7 +15,7 @@ var code2Message = map[string]string{
 	INVALID_TOKEN:        "Token 驗證失敗",
 	EXPIRED_TOKEN:        "Token 過期",
 	BAD_REQUEST:          "輸入錯誤",
-	TPYE_ASSERTION_ERROR: "內部推斷型態錯誤",
+	TYPE_ASSERTION_ERROR: "內部推斷型態錯誤",
 }
 
 func Message(code string) string {
