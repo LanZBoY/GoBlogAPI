@@ -70,6 +70,11 @@ func setupRouter(svc *mockPostService, withUser bool) *gin.Engine {
 	return r
 }
 
+func TestNewPostRouter(t *testing.T) {
+	r := NewPostRouter(nil)
+	assert.NotNil(t, r)
+}
+
 func TestCreatePost(t *testing.T) {
 	svc := new(mockPostService)
 	router := setupRouter(svc, true)
@@ -94,6 +99,22 @@ func TestCreatePost_BindError(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	svc.AssertExpectations(t)
+}
+
+func TestCreatePost_ServiceError(t *testing.T) {
+	svc := new(mockPostService)
+	router := setupRouter(svc, true)
+	body := PostSchema.PostCreate{Title: "t"}
+	bs, _ := json.Marshal(body)
+	svc.On("CreatePost", mock.Anything, &body, "uid").Return(errors.New("svc"))
+
+	req := httptest.NewRequest(http.MethodPost, "/posts", bytes.NewReader(bs))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	svc.AssertExpectations(t)
 }
 
@@ -132,6 +153,16 @@ func TestListPosts_Error(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	svc.AssertExpectations(t)
+}
+
+func TestListPosts_BindError(t *testing.T) {
+	svc := new(mockPostService)
+	router := setupRouter(svc, false)
+	req := httptest.NewRequest(http.MethodGet, "/posts?limit=bad", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 	svc.AssertExpectations(t)
 }
 
@@ -199,6 +230,17 @@ func TestUpdatePost_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	svc.AssertExpectations(t)
+}
+
+func TestUpdatePost_BindError(t *testing.T) {
+	svc := new(mockPostService)
+	router := setupRouter(svc, false)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/id", bytes.NewBufferString(`{"title":1}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	svc.AssertExpectations(t)
 }

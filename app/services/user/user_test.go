@@ -270,3 +270,163 @@ func TestGetUserById(t *testing.T) {
 		}
 	}
 }
+
+func TestListUsers(t *testing.T) {
+	query := &basemodel.BaseQuery{Skip: 0, Limit: 10}
+	oid := primitive.NewObjectID()
+	tests := []struct {
+		name      string
+		repoUsers []UserModel.UserDocument
+		repoErr   error
+		wantErr   bool
+	}{
+		{
+			name:      "Normal",
+			repoUsers: []UserModel.UserDocument{{Id: oid, Email: "e", Username: "u"}},
+			repoErr:   nil,
+			wantErr:   false,
+		},
+		{
+			name:      "RepoError",
+			repoUsers: nil,
+			repoErr:   errors.New("err"),
+			wantErr:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := new(MockUserRepo)
+			mockPasswordUtils := new(testutils.MockPasswordUtils)
+			mockObjIdCreator := new(testutils.MockObjectIDCreator)
+			mockRepo.On("QueryUsers", mock.Anything, query).Return(tt.repoUsers, tt.repoErr)
+
+			svc := UserSvc.NewUserService(mockRepo, mockPasswordUtils, mockObjIdCreator)
+			users, err := svc.ListUsers(context.TODO(), query)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Len(t, users, len(tt.repoUsers))
+				if len(tt.repoUsers) > 0 {
+					assert.Equal(t, tt.repoUsers[0].Id, users[0].Id)
+				}
+			}
+
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestUpdateUserById(t *testing.T) {
+	oid := primitive.NewObjectID()
+	tests := []struct {
+		name      string
+		id        string
+		mockSetup func(*MockUserRepo, *testutils.MockObjectIDCreator, context.Context, primitive.ObjectID)
+		wantErr   bool
+	}{
+		{
+			name: "Normal",
+			id:   primitive.NewObjectID().Hex(),
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(id, nil)
+				repo.On("UpdateUserById", ctx, id, mock.Anything, mock.Anything).Return(nil)
+			},
+			wantErr: false,
+		},
+		{
+			name: "BadId",
+			id:   "bad",
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(primitive.NilObjectID, errors.New(""))
+			},
+			wantErr: true,
+		},
+		{
+			name: "RepoError",
+			id:   primitive.NewObjectID().Hex(),
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(id, nil)
+				repo.On("UpdateUserById", ctx, id, mock.Anything, mock.Anything).Return(errors.New("repo"))
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := new(MockUserRepo)
+			oc := new(testutils.MockObjectIDCreator)
+			pass := new(testutils.MockPasswordUtils)
+			tt.mockSetup(repo, oc, context.TODO(), oid)
+			svc := UserSvc.NewUserService(repo, pass, oc)
+
+			err := svc.UpdateUserById(context.TODO(), tt.id, &UserSchema.UserUpdate{})
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			repo.AssertExpectations(t)
+			oc.AssertExpectations(t)
+		})
+	}
+}
+
+func TestDeleteUserById(t *testing.T) {
+	oid := primitive.NewObjectID()
+	tests := []struct {
+		name      string
+		id        string
+		mockSetup func(*MockUserRepo, *testutils.MockObjectIDCreator, context.Context, primitive.ObjectID)
+		wantErr   bool
+	}{
+		{
+			name: "Normal",
+			id:   primitive.NewObjectID().Hex(),
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(id, nil)
+				repo.On("DeleteUserById", ctx, id, mock.Anything).Return(nil)
+			},
+			wantErr: false,
+		},
+		{
+			name: "BadId",
+			id:   "bad",
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(primitive.NilObjectID, errors.New(""))
+			},
+			wantErr: true,
+		},
+		{
+			name: "RepoError",
+			id:   primitive.NewObjectID().Hex(),
+			mockSetup: func(repo *MockUserRepo, oc *testutils.MockObjectIDCreator, ctx context.Context, id primitive.ObjectID) {
+				oc.On("ObjectIDFromHex", mock.Anything).Return(id, nil)
+				repo.On("DeleteUserById", ctx, id, mock.Anything).Return(errors.New("repo"))
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := new(MockUserRepo)
+			oc := new(testutils.MockObjectIDCreator)
+			pass := new(testutils.MockPasswordUtils)
+			tt.mockSetup(repo, oc, context.TODO(), oid)
+			svc := UserSvc.NewUserService(repo, pass, oc)
+
+			err := svc.DeleteUserById(context.TODO(), tt.id)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			repo.AssertExpectations(t)
+			oc.AssertExpectations(t)
+		})
+	}
+}

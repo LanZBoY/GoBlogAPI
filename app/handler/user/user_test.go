@@ -77,6 +77,11 @@ func setupRouter(us *mockUserService, mws ...gin.HandlerFunc) *gin.Engine {
 	return r
 }
 
+func TestNewUserRouter(t *testing.T) {
+	r := NewUserRouter(nil)
+	assert.NotNil(t, r)
+}
+
 func TestCreateUser(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockSvc := new(mockUserService)
@@ -252,6 +257,16 @@ func TestUpdateUser(t *testing.T) {
 		mockSvc.On("UpdateUserById", mock.Anything, "1", &up).Return(errors.New("fail"))
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodPatch, "/users/1", bytes.NewReader(body))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		mockSvc.AssertExpectations(t)
+	})
+
+	t.Run("BindError", func(t *testing.T) {
+		mockSvc := new(mockUserService)
+		router := setupRouter(mockSvc)
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPatch, "/users/1", strings.NewReader(`{"email":1}`))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 		mockSvc.AssertExpectations(t)
