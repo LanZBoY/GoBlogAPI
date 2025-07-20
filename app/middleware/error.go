@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"wentee/blog/app/schema/apperror"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,8 @@ func ErrorHandler() gin.HandlerFunc {
 				}
 
 				c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": fieldErrs})
+			case *strconv.NumError:
+				c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": err.Error()})
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{"Message": "Internal Server Error"})
 			}

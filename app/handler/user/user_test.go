@@ -181,7 +181,6 @@ func TestListUsers(t *testing.T) {
 	t.Run("ServiceError", func(t *testing.T) {
 		mockSvc := new(mockUserService)
 		router := setupRouter(mockSvc)
-		q := basemodel.NewDefaultQuery()
 		mockSvc.On("CountUsers", mock.Anything).Return(int64(0), errors.New("fail"))
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "/users", nil)
