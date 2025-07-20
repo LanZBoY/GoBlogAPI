@@ -12,22 +12,22 @@ import (
 
 func TestGetMongoClientSuccess(t *testing.T) {
 	expected := &mongo.Client{}
-	old := mongoConnect
-	mongoConnect = func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	old := MongoConnect
+	MongoConnect = func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
 		return expected, nil
 	}
-	defer func() { mongoConnect = old }()
+	defer func() { MongoConnect = old }()
 
 	client := GetMongoClient(options.Client())
 	assert.Equal(t, expected, client)
 }
 
 func TestGetMongoClientError(t *testing.T) {
-	old := mongoConnect
-	mongoConnect = func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	old := MongoConnect
+	MongoConnect = func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
 		return nil, errors.New("fail")
 	}
-	defer func() { mongoConnect = old }()
+	defer func() { MongoConnect = old }()
 
 	assert.PanicsWithValue(t, "Mongo Connection Error!", func() {
 		GetMongoClient(options.Client())
