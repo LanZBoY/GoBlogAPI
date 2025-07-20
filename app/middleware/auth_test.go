@@ -17,6 +17,10 @@ import (
 )
 
 func generateToken(exp time.Time) string {
+	return generateTokenWithSecret(exp, config.JWT_SECRET)
+}
+
+func generateTokenWithSecret(exp time.Time, secret string) string {
 	claims := AuthSchema.JWTClaims{
 		UserInfo: AuthSchema.JWTUserInfo{Id: "123"},
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -25,7 +29,7 @@ func generateToken(exp time.Time) string {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, _ := token.SignedString([]byte(config.JWT_SECRET))
+	tokenStr, _ := token.SignedString([]byte(secret))
 	return tokenStr
 }
 
@@ -77,5 +81,28 @@ func TestRequiredAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusForbidden, w.Code)
 		assert.Contains(t, w.Body.String(), errcode.EXPIRED_TOKEN)
+	})
+
+	t.Run("InvalidSignature", func(t *testing.T) {
+		token := generateTokenWithSecret(time.Now().Add(time.Hour), "wrongSecret")
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", token)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+		assert.Contains(t, w.Body.String(), errcode.INVALID_TOKEN)
+	})
+
+	t.Run("MalformedToken", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", "not.a.valid.token")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "Internal Server Error")
 	})
 }
