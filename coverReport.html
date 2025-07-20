@@ -55,25 +55,25 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">wentee/blog/app/appinit/mongo.go (0.0%)</option>
+				<option value="file0">wentee/blog/app/appinit/mongo.go (100.0%)</option>
 				
 				<option value="file1">wentee/blog/app/config/environment.go (100.0%)</option>
 				
-				<option value="file2">wentee/blog/app/di/container.go (0.0%)</option>
+				<option value="file2">wentee/blog/app/di/container.go (100.0%)</option>
 				
 				<option value="file3">wentee/blog/app/docs/docs.go (0.0%)</option>
 				
-				<option value="file4">wentee/blog/app/handler/auth/auth.go (0.0%)</option>
+				<option value="file4">wentee/blog/app/handler/auth/auth.go (100.0%)</option>
 				
-				<option value="file5">wentee/blog/app/handler/post/post.go (0.0%)</option>
+				<option value="file5">wentee/blog/app/handler/post/post.go (95.5%)</option>
 				
-				<option value="file6">wentee/blog/app/handler/user/user.go (0.0%)</option>
+				<option value="file6">wentee/blog/app/handler/user/user.go (92.9%)</option>
 				
-				<option value="file7">wentee/blog/app/main.go (0.0%)</option>
+				<option value="file7">wentee/blog/app/main.go (28.6%)</option>
 				
-				<option value="file8">wentee/blog/app/middleware/auth.go (0.0%)</option>
+				<option value="file8">wentee/blog/app/middleware/auth.go (86.4%)</option>
 				
-				<option value="file9">wentee/blog/app/middleware/error.go (0.0%)</option>
+				<option value="file9">wentee/blog/app/middleware/error.go (100.0%)</option>
 				
 				<option value="file10">wentee/blog/app/repo/post/post_impl.go (100.0%)</option>
 				
@@ -85,29 +85,29 @@
 				
 				<option value="file14">wentee/blog/app/repo/user/user_interface.go (0.0%)</option>
 				
-				<option value="file15">wentee/blog/app/routes/routes.go (0.0%)</option>
+				<option value="file15">wentee/blog/app/routes/routes.go (100.0%)</option>
 				
-				<option value="file16">wentee/blog/app/routes/v1/auth.go (0.0%)</option>
+				<option value="file16">wentee/blog/app/routes/v1/auth.go (100.0%)</option>
 				
-				<option value="file17">wentee/blog/app/routes/v1/post.go (0.0%)</option>
+				<option value="file17">wentee/blog/app/routes/v1/post.go (100.0%)</option>
 				
-				<option value="file18">wentee/blog/app/routes/v1/user.go (0.0%)</option>
+				<option value="file18">wentee/blog/app/routes/v1/user.go (100.0%)</option>
 				
-				<option value="file19">wentee/blog/app/schema/apperror/apperror.go (0.0%)</option>
+				<option value="file19">wentee/blog/app/schema/apperror/apperror.go (75.0%)</option>
 				
-				<option value="file20">wentee/blog/app/schema/apperror/errcode/error_code.go (0.0%)</option>
+				<option value="file20">wentee/blog/app/schema/apperror/errcode/error_code.go (100.0%)</option>
 				
-				<option value="file21">wentee/blog/app/schema/basemodel/base.go (0.0%)</option>
+				<option value="file21">wentee/blog/app/schema/basemodel/base.go (100.0%)</option>
 				
 				<option value="file22">wentee/blog/app/services/auth/auth.go (81.8%)</option>
 				
-				<option value="file23">wentee/blog/app/services/post/post_impl.go (58.6%)</option>
+				<option value="file23">wentee/blog/app/services/post/post_impl.go (93.1%)</option>
 				
-				<option value="file24">wentee/blog/app/services/user/user_impl.go (55.6%)</option>
+				<option value="file24">wentee/blog/app/services/user/user_impl.go (100.0%)</option>
 				
-				<option value="file25">wentee/blog/app/testutils/mongo_utils.go (0.0%)</option>
+				<option value="file25">wentee/blog/app/testutils/mongo_utils.go (100.0%)</option>
 				
-				<option value="file26">wentee/blog/app/testutils/password_utils.go (0.0%)</option>
+				<option value="file26">wentee/blog/app/testutils/password_utils.go (100.0%)</option>
 				
 				<option value="file27">wentee/blog/app/utils/mongo/mongoutils/count.go (81.8%)</option>
 				
@@ -139,17 +139,20 @@ import (
         "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetMongoClient(opt *options.ClientOptions) *mongo.Client <span class="cov0" title="0">{
+// MongoConnect wraps mongo.Connect so tests can replace it.
+var MongoConnect = mongo.Connect
+
+func GetMongoClient(opt *options.ClientOptions) *mongo.Client <span class="cov8" title="1">{
         ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
         defer cancel()
 
-        client, err := mongo.Connect(ctx, opt)
+        client, err := MongoConnect(ctx, opt)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 panic("Mongo Connection Error!")</span>
         }
 
-        <span class="cov0" title="0">return client</span>
+        <span class="cov8" title="1">return client</span>
 }
 </pre>
 		
@@ -205,7 +208,7 @@ type Container struct {
         PostRouter *PostRouter.PostRouter
 }
 
-func InitContainer(appCtx *appinit.AppContext) *Container <span class="cov0" title="0">{
+func InitContainer(appCtx *appinit.AppContext) *Container <span class="cov8" title="1">{
         mainDB := appCtx.MongoClient.Database(config.MOGNO_DATABASE)
         docCounter := &amp;mongoutils.MongoUtils{}
         passwordUtils := &amp;utils.PasswordUtils{}
@@ -928,10 +931,10 @@ import (
 )
 
 type AuthRouter struct {
-        authSvc *AuthSvc.AuthService
+        authSvc AuthSvc.IAuthService
 }
 
-func NewAuthRouter(authSvc *AuthSvc.AuthService) *AuthRouter <span class="cov0" title="0">{
+func NewAuthRouter(authSvc AuthSvc.IAuthService) *AuthRouter <span class="cov8" title="1">{
 
         return &amp;AuthRouter{
                 authSvc: authSvc,
@@ -945,21 +948,21 @@ func NewAuthRouter(authSvc *AuthSvc.AuthService) *AuthRouter <span class="cov0" 
 // @Param                loginInfo        body                AuthSchema.LoginInfo        true        "登入資訊"
 // @Success        200                        {object}        basemodel.BaseResponse{data=AuthSchema.TokenResponse}
 // @Router                /auth/login        [post]
-func (api *AuthRouter) Login(c *gin.Context) <span class="cov0" title="0">{
+func (api *AuthRouter) Login(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         var loginInfo AuthSchema.LoginInfo
-        if err := c.ShouldBindJSON(&amp;loginInfo); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindJSON(&amp;loginInfo); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">tokenString, err := api.authSvc.TryLogin(ctx, &amp;loginInfo)
+        <span class="cov8" title="1">tokenString, err := api.authSvc.TryLogin(ctx, &amp;loginInfo)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
 
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: AuthSchema.TokenResponse{Token: tokenString}})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: AuthSchema.TokenResponse{Token: tokenString}})</span>
 }
 </pre>
 		
@@ -979,7 +982,7 @@ type PostRouter struct {
         postSvc PostSvc.IPostService
 }
 
-func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter <span class="cov0" title="0">{
+func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter <span class="cov8" title="1">{
         return &amp;PostRouter{
                 postSvc: postSvc,
         }
@@ -994,7 +997,7 @@ func NewPostRouter(postSvc *PostSvc.PostService) *PostRouter <span class="cov0" 
 // @param PostCreateData body PostSchema.PostCreate true "貼文資訊"
 // @Success        201
 // @router /posts [POST]
-func (api *PostRouter) CreatePost(c *gin.Context) <span class="cov0" title="0">{
+func (api *PostRouter) CreatePost(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         userInfo, err := reqcontext.GetUserInfo(c)
 
@@ -1003,12 +1006,12 @@ func (api *PostRouter) CreatePost(c *gin.Context) <span class="cov0" title="0">{
                 return
         }</span>
 
-        <span class="cov0" title="0">var postCreate PostSchema.PostCreate
-        if err := c.ShouldBindJSON(&amp;postCreate); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">var postCreate PostSchema.PostCreate
+        if err := c.ShouldBindJSON(&amp;postCreate); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">if err := api.postSvc.CreatePost(ctx, &amp;postCreate, userInfo.Id); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := api.postSvc.CreatePost(ctx, &amp;postCreate, userInfo.Id); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
@@ -1022,20 +1025,20 @@ func (api *PostRouter) CreatePost(c *gin.Context) <span class="cov0" title="0">{
 // @produce application/json
 // @Success        200 {object} basemodel.BaseListResponse{total=int, data=[]PostSchema.PostList}
 // @router /posts [GET]
-func (api *PostRouter) ListPosts(c *gin.Context) <span class="cov0" title="0">{
+func (api *PostRouter) ListPosts(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         query := basemodel.NewDefaultQuery()
-        if err := c.ShouldBindQuery(&amp;query); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindQuery(&amp;query); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
 
-        <span class="cov0" title="0">total, posts, err := api.postSvc.ListPosts(ctx, &amp;query)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">total, posts, err := api.postSvc.ListPosts(ctx, &amp;query)
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: posts})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: posts})</span>
 }
 
 // @summary 取得貼文內容
@@ -1047,16 +1050,16 @@ func (api *PostRouter) ListPosts(c *gin.Context) <span class="cov0" title="0">{
 // @param id path string true "貼文ID"
 // @Success        200 {object} basemodel.BaseResponse{data=PostSchema.Post}
 // @router /posts/{id} [GET]
-func (api *PostRouter) GetPost(c *gin.Context) <span class="cov0" title="0">{
+func (api *PostRouter) GetPost(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         id := c.Param("id")
 
         post, err := api.postSvc.GetPostById(ctx, id)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: post})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: post})</span>
 }
 
 // @summary 更新貼文內容
@@ -1069,16 +1072,16 @@ func (api *PostRouter) GetPost(c *gin.Context) <span class="cov0" title="0">{
 // @Param PostUpdate body PostSchema.PostUpdate true "更新貼文欄位"
 // @Success        200
 // @router /posts/{id} [PATCH]
-func (api *PostRouter) UpdatePost(c *gin.Context) <span class="cov0" title="0">{
+func (api *PostRouter) UpdatePost(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         id := c.Param("id")
         var updateData PostSchema.PostUpdate
 
-        if err := c.ShouldBindJSON(&amp;updateData); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindJSON(&amp;updateData); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">if err := api.postSvc.UpdatePostById(ctx, id, &amp;updateData); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := api.postSvc.UpdatePostById(ctx, id, &amp;updateData); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
@@ -1094,11 +1097,11 @@ func (api *PostRouter) UpdatePost(c *gin.Context) <span class="cov0" title="0">{
 // @param id path string true "貼文ID"
 // @Success        204
 // @router /posts/{id} [DELETE]
-func (api *PostRouter) DeletePost(c *gin.Context) <span class="cov0" title="0">{
+func (api *PostRouter) DeletePost(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         id := c.Param("id")
 
-        if err := api.postSvc.DeletePostById(ctx, id); err != nil </span><span class="cov0" title="0">{
+        if err := api.postSvc.DeletePostById(ctx, id); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
@@ -1122,7 +1125,7 @@ type UserRouter struct {
         userSvc UserSvc.IUserService
 }
 
-func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter <span class="cov0" title="0">{
+func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter <span class="cov8" title="1">{
         return &amp;UserRouter{
                 userSvc: userSvc,
         }
@@ -1137,20 +1140,20 @@ func NewUserRouter(userSvc *UserSvc.UserService) *UserRouter <span class="cov0" 
 // @param UserCreateData body UserSchema.UserCreate true "使用者建立資訊"
 // @Success        201
 // @router /users [POST]
-func (api *UserRouter) CreateUser(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) CreateUser(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         var userCreate UserSchema.UserCreate
 
-        if err := c.ShouldBindJSON(&amp;userCreate); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindJSON(&amp;userCreate); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
 
-        <span class="cov0" title="0">if err := api.userSvc.RegistryUser(ctx, &amp;userCreate); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := api.userSvc.RegistryUser(ctx, &amp;userCreate); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.Status(http.StatusCreated)</span>
+        <span class="cov8" title="1">c.Status(http.StatusCreated)</span>
 }
 
 // @summary 取得使用者資訊
@@ -1162,16 +1165,16 @@ func (api *UserRouter) CreateUser(c *gin.Context) <span class="cov0" title="0">{
 // @param id path string true "使用者識別ID"
 // @Success        200 {object} basemodel.BaseResponse{data=UserSchema.UserInfo}
 // @router /users/{id} [GET]
-func (api *UserRouter) GetUser(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) GetUser(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         id := c.Param("id")
         userData, err := api.userSvc.GetUserById(ctx, id)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})</span>
 
 }
 
@@ -1183,27 +1186,27 @@ func (api *UserRouter) GetUser(c *gin.Context) <span class="cov0" title="0">{
 // @produce application/json
 // @Success        200 {object} basemodel.BaseListResponse{total=int, data=[]UserSchema.UserInfo}
 // @router /users [GET]
-func (api *UserRouter) ListUsers(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) ListUsers(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         baseQuery := basemodel.NewDefaultQuery()
 
-        if err := c.ShouldBindQuery(&amp;baseQuery); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindQuery(&amp;baseQuery); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">total, err := api.userSvc.CountUsers(ctx)
+        <span class="cov8" title="1">total, err := api.userSvc.CountUsers(ctx)
 
+        if err != nil </span><span class="cov8" title="1">{
+                c.Error(err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">users, err := api.userSvc.ListUsers(ctx, &amp;baseQuery)
         if err != nil </span><span class="cov0" title="0">{
                 c.Error(err)
                 return
         }</span>
-
-        <span class="cov0" title="0">users, err := api.userSvc.ListUsers(ctx, &amp;baseQuery)
-        if err != nil </span><span class="cov0" title="0">{
-                c.Error(err)
-                return
-        }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: users})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseListResponse{Total: total, Data: users})</span>
 }
 
 // @summary 取得我的資訊
@@ -1214,7 +1217,7 @@ func (api *UserRouter) ListUsers(c *gin.Context) <span class="cov0" title="0">{
 // @produce application/json
 // @Success        200 {object} basemodel.BaseResponse{data=UserSchema.UserInfo}
 // @router /users/me [GET]
-func (api *UserRouter) GetMe(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) GetMe(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         userInfo, err := reqcontext.GetUserInfo(c)
         if err != nil </span><span class="cov0" title="0">{
@@ -1222,13 +1225,13 @@ func (api *UserRouter) GetMe(c *gin.Context) <span class="cov0" title="0">{
                 return
         }</span>
 
-        <span class="cov0" title="0">userData, err := api.userSvc.GetUserById(ctx, userInfo.Id)
+        <span class="cov8" title="1">userData, err := api.userSvc.GetUserById(ctx, userInfo.Id)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})</span>
+        <span class="cov8" title="1">c.JSON(http.StatusOK, basemodel.BaseResponse{Data: userData})</span>
 }
 
 // @summary 刪除使用者
@@ -1240,15 +1243,15 @@ func (api *UserRouter) GetMe(c *gin.Context) <span class="cov0" title="0">{
 // @param id path string true "使用者識別ID"
 // @Success        204
 // @router /users/{id} [DELETE]
-func (api *UserRouter) DeleteUser(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) DeleteUser(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         err := api.userSvc.DeleteUserById(ctx, c.Param("id"))
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">c.Status(http.StatusNoContent)</span>
+        <span class="cov8" title="1">c.Status(http.StatusNoContent)</span>
 }
 
 // @summary 更新使用者資訊
@@ -1261,16 +1264,16 @@ func (api *UserRouter) DeleteUser(c *gin.Context) <span class="cov0" title="0">{
 // @Param UserUpdate body UserSchema.UserUpdate true "更新使用者資訊欄位"
 // @Success        200
 // @router /users/{id} [PATCH]
-func (api *UserRouter) UpdateUser(c *gin.Context) <span class="cov0" title="0">{
+func (api *UserRouter) UpdateUser(c *gin.Context) <span class="cov8" title="1">{
         ctx := c.Request.Context()
         id := c.Param("id")
         var userUpdate UserSchema.UserUpdate
 
-        if err := c.ShouldBindJSON(&amp;userUpdate); err != nil </span><span class="cov0" title="0">{
+        if err := c.ShouldBindJSON(&amp;userUpdate); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
-        <span class="cov0" title="0">if err := api.userSvc.UpdateUserById(ctx, id, &amp;userUpdate); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := api.userSvc.UpdateUserById(ctx, id, &amp;userUpdate); err != nil </span><span class="cov8" title="1">{
                 c.Error(err)
                 return
         }</span>
@@ -1310,7 +1313,7 @@ func main() <span class="cov0" title="0">{
 
 }</span>
 
-func setupCtx() *appinit.AppContext <span class="cov0" title="0">{
+func setupCtx() *appinit.AppContext <span class="cov8" title="1">{
         newContext := &amp;appinit.AppContext{
                 MongoClient: appinit.GetMongoClient(options.Client().ApplyURI(config.MONGO_URI)),
         }
@@ -1338,40 +1341,40 @@ type AuthMiddleware struct {
         // userCollection *mongo.Collection
 }
 
-func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc <span class="cov0" title="0">{
-        return func(c *gin.Context) </span><span class="cov0" title="0">{
+func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc <span class="cov8" title="1">{
+        return func(c *gin.Context) </span><span class="cov8" title="1">{
                 tokenString := c.GetHeader("Authorization")
 
-                if tokenString == "" </span><span class="cov0" title="0">{
+                if tokenString == "" </span><span class="cov8" title="1">{
                         c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
                         c.Abort()
                         return
                 }</span>
-                <span class="cov0" title="0">token, err := jwt.ParseWithClaims(tokenString, &amp;AuthSchema.JWTClaims{}, func(token *jwt.Token) (any, error) </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">token, err := jwt.ParseWithClaims(tokenString, &amp;AuthSchema.JWTClaims{}, func(token *jwt.Token) (any, error) </span><span class="cov8" title="1">{
 
                         return []byte(config.JWT_SECRET), nil
                 }</span>)
 
-                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                         switch </span>{
-                        case errors.Is(err, jwt.ErrSignatureInvalid):<span class="cov0" title="0">
+                        case errors.Is(err, jwt.ErrSignatureInvalid):<span class="cov8" title="1">
                                 c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, err))</span>
-                        case errors.Is(err, jwt.ErrTokenExpired):<span class="cov0" title="0">
+                        case errors.Is(err, jwt.ErrTokenExpired):<span class="cov8" title="1">
                                 c.Error(apperror.New(http.StatusForbidden, errcode.EXPIRED_TOKEN, err))</span>
-                        default:<span class="cov0" title="0">
+                        default:<span class="cov8" title="1">
                                 c.Error(err)</span>
                         }
-                        <span class="cov0" title="0">c.Abort()
+                        <span class="cov8" title="1">c.Abort()
                         return</span>
                 }
-                <span class="cov0" title="0">claim, ok := token.Claims.(*AuthSchema.JWTClaims)
+                <span class="cov8" title="1">claim, ok := token.Claims.(*AuthSchema.JWTClaims)
                 if !ok </span><span class="cov0" title="0">{
                         c.Error(apperror.New(http.StatusForbidden, errcode.INVALID_TOKEN, nil))
                         c.Abort()
                         return
                 }</span>
 
-                <span class="cov0" title="0">c.Set(reqcontext.USER_INFO, claim.UserInfo)
+                <span class="cov8" title="1">c.Set(reqcontext.USER_INFO, claim.UserInfo)
                 c.Next()</span>
         }
 }
@@ -1382,6 +1385,7 @@ func (authMiddleware *AuthMiddleware) RequiredAuth() gin.HandlerFunc <span class
 import (
         "fmt"
         "net/http"
+        "strconv"
         "wentee/blog/app/schema/apperror"
 
         "github.com/gin-gonic/gin"
@@ -1390,25 +1394,27 @@ import (
 
 type HandlerFuncWithError func(c *gin.Context) error
 
-func ErrorHandler() gin.HandlerFunc <span class="cov0" title="0">{
-        return func(c *gin.Context) </span><span class="cov0" title="0">{
+func ErrorHandler() gin.HandlerFunc <span class="cov8" title="1">{
+        return func(c *gin.Context) </span><span class="cov8" title="1">{
                 c.Next() // Run This Before
 
-                if len(c.Errors) &gt; 0 </span><span class="cov0" title="0">{
+                if len(c.Errors) &gt; 0 </span><span class="cov8" title="1">{
                         err := c.Errors.Last().Err
 
                         switch e := err.(type) </span>{
-                        case apperror.AppError:<span class="cov0" title="0">
+                        case apperror.AppError:<span class="cov8" title="1">
                                 c.JSON(e.Status, gin.H{"Code": e.Code, "Message": e.GetMessage()})</span>
-                        case validator.ValidationErrors:<span class="cov0" title="0">
+                        case validator.ValidationErrors:<span class="cov8" title="1">
                                 fieldErrs := make([]string, len(e))
 
-                                for i, fieldErr := range e </span><span class="cov0" title="0">{
+                                for i, fieldErr := range e </span><span class="cov8" title="1">{
                                         fieldErrs[i] = fmt.Sprintf("%v", fieldErr.Error())
                                 }</span>
 
-                                <span class="cov0" title="0">c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": fieldErrs})</span>
-                        default:<span class="cov0" title="0">
+                                <span class="cov8" title="1">c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": fieldErrs})</span>
+                        case *strconv.NumError:<span class="cov8" title="1">
+                                c.JSON(http.StatusUnprocessableEntity, gin.H{"Message": err.Error()})</span>
+                        default:<span class="cov8" title="1">
                                 c.JSON(http.StatusInternalServerError, gin.H{"Message": "Internal Server Error"})</span>
                         }
                 }
@@ -1819,7 +1825,7 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func SetupRouter(container *di.Container) *gin.Engine <span class="cov0" title="0">{
+func SetupRouter(container *di.Container) *gin.Engine <span class="cov8" title="1">{
         r := gin.New()
 
         r.Use(gin.Logger())
@@ -1843,7 +1849,7 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func RegistryAuthRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov0" title="0">{
+func RegistryAuthRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov8" title="1">{
         rg.POST("/login", container.AuthRouter.Login)
 }</span>
 </pre>
@@ -1856,12 +1862,12 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func RegistryPostRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov0" title="0">{
+func RegistryPostRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov8" title="1">{
         rg.POST("", container.PostRouter.CreatePost)
         rg.GET("", container.PostRouter.ListPosts)
 
         id_group := rg.Group("/:id")
-        </span><span class="cov0" title="0">{
+        </span><span class="cov8" title="1">{
                 id_group.GET("", container.PostRouter.GetPost)
                 id_group.PATCH("", container.PostRouter.UpdatePost)
                 id_group.DELETE("", container.PostRouter.DeletePost)
@@ -1877,13 +1883,13 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func RegistryUserRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov0" title="0">{
+func RegistryUserRouter(rg *gin.RouterGroup, container *di.Container) <span class="cov8" title="1">{
         rg.POST("", container.UserRouter.CreateUser)
         rg.GET("", container.UserRouter.ListUsers)
         rg.GET("/me", container.UserRouter.GetMe)
 
         id_rg := rg.Group("/:id")
-        </span><span class="cov0" title="0">{
+        </span><span class="cov8" title="1">{
                 id_rg.GET("", container.UserRouter.GetUser)
                 id_rg.PATCH("", container.UserRouter.UpdateUser)
                 id_rg.DELETE("", container.UserRouter.DeleteUser)
@@ -1902,11 +1908,11 @@ type AppError struct {
         Err     error
 }
 
-func (appError *AppError) GetMessage() string <span class="cov0" title="0">{
+func (appError *AppError) GetMessage() string <span class="cov8" title="1">{
         return errcode.Message(appError.Code)
 }</span>
 
-func New(status int, code string, err error) AppError <span class="cov0" title="0">{
+func New(status int, code string, err error) AppError <span class="cov8" title="1">{
         return AppError{
                 Code:   code,
                 Status: status,
@@ -1918,7 +1924,7 @@ func (e AppError) Error() string <span class="cov0" title="0">{
         return e.Message
 }</span>
 
-func (e *AppError) RawErr() error <span class="cov0" title="0">{
+func (e *AppError) RawErr() error <span class="cov8" title="1">{
         return e.Err
 }</span>
 </pre>
@@ -1943,13 +1949,13 @@ var code2Message = map[string]string{
         TYPE_ASSERTION_ERROR: "內部推斷型態錯誤",
 }
 
-func Message(code string) string <span class="cov0" title="0">{
+func Message(code string) string <span class="cov8" title="1">{
 
-        if message, ok := code2Message[code]; ok </span><span class="cov0" title="0">{
+        if message, ok := code2Message[code]; ok </span><span class="cov8" title="1">{
                 return message
         }</span>
 
-        <span class="cov0" title="0">return "未定義錯誤"</span>
+        <span class="cov8" title="1">return "未定義錯誤"</span>
 }
 </pre>
 		
@@ -1969,7 +1975,7 @@ type BaseQuery struct {
         Limit int64 `form:"limit"`
 }
 
-func NewDefaultQuery() BaseQuery <span class="cov0" title="0">{
+func NewDefaultQuery() BaseQuery <span class="cov8" title="1">{
         return BaseQuery{
                 Skip:  0,
                 Limit: 10,
@@ -2104,23 +2110,23 @@ func (svc *PostService) GetPostById(ctx context.Context, id string) (post PostSc
         return</span>
 }
 
-func (svc *PostService) UpdatePostById(ctx context.Context, id string, updateData *PostSchema.PostUpdate) (err error) <span class="cov0" title="0">{
+func (svc *PostService) UpdatePostById(ctx context.Context, id string, updateData *PostSchema.PostUpdate) (err error) <span class="cov8" title="1">{
         oid, err := primitive.ObjectIDFromHex(id)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return
         }</span>
-        <span class="cov0" title="0">err = svc.postRepo.UpdatePostById(ctx, oid, updateData)
+        <span class="cov8" title="1">err = svc.postRepo.UpdatePostById(ctx, oid, updateData)
         return</span>
 }
 
-func (svc *PostService) DeletePostById(ctx context.Context, id string) (err error) <span class="cov0" title="0">{
+func (svc *PostService) DeletePostById(ctx context.Context, id string) (err error) <span class="cov8" title="1">{
         oid, err := primitive.ObjectIDFromHex(id)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return
         }</span>
 
-        <span class="cov0" title="0">err = svc.postRepo.DeletePostById(ctx, oid)
+        <span class="cov8" title="1">err = svc.postRepo.DeletePostById(ctx, oid)
 
         return</span>
 }
@@ -2210,15 +2216,15 @@ func (svc *UserService) GetUserById(ctx context.Context, id string) (*UserSchema
         }, nil</span>
 }
 
-func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.BaseQuery) (users []UserSchema.UserInfo, err error) <span class="cov0" title="0">{
+func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.BaseQuery) (users []UserSchema.UserInfo, err error) <span class="cov8" title="1">{
 
         userDocs, err := svc.userRepo.QueryUsers(ctx, baseQuery)
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return
         }</span>
 
-        <span class="cov0" title="0">for _, userDoc := range userDocs </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">for _, userDoc := range userDocs </span><span class="cov8" title="1">{
                 users = append(users, UserSchema.UserInfo{
                         Id:       userDoc.Id,
                         Email:    userDoc.Email,
@@ -2226,25 +2232,25 @@ func (svc *UserService) ListUsers(ctx context.Context, baseQuery *basemodel.Base
                 })
         }</span>
 
-        <span class="cov0" title="0">return</span>
+        <span class="cov8" title="1">return</span>
 
 }
 
-func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate *UserSchema.UserUpdate) (err error) <span class="cov0" title="0">{
+func (svc *UserService) UpdateUserById(ctx context.Context, id string, userUpdate *UserSchema.UserUpdate) (err error) <span class="cov8" title="1">{
         oId, err := svc.objectCreator.ObjectIDFromHex(id)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return
         }</span>
-        <span class="cov0" title="0">err = svc.userRepo.UpdateUserById(ctx, oId, userUpdate)
+        <span class="cov8" title="1">err = svc.userRepo.UpdateUserById(ctx, oId, userUpdate)
         return</span>
 }
 
-func (svc *UserService) DeleteUserById(ctx context.Context, id string) (err error) <span class="cov0" title="0">{
+func (svc *UserService) DeleteUserById(ctx context.Context, id string) (err error) <span class="cov8" title="1">{
         oid, err := svc.objectCreator.ObjectIDFromHex(id)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return
         }</span>
-        <span class="cov0" title="0">err = svc.userRepo.DeleteUserById(ctx, oid)
+        <span class="cov8" title="1">err = svc.userRepo.DeleteUserById(ctx, oid)
         return</span>
 }
 </pre>
@@ -2266,56 +2272,56 @@ type MockCollection struct {
         mock.Mock
 }
 
-func AppendCallArgs[T any](fixed []any, variadic []T) []any <span class="cov0" title="0">{
+func AppendCallArgs[T any](fixed []any, variadic []T) []any <span class="cov8" title="1">{
         out := make([]any, 0, len(fixed)+len(variadic))
 
         out = append(out, fixed...)
 
-        for _, v := range variadic </span><span class="cov0" title="0">{
+        for _, v := range variadic </span><span class="cov8" title="1">{
                 out = append(out, v)
         }</span>
-        <span class="cov0" title="0">return out</span>
+        <span class="cov8" title="1">return out</span>
 }
 
-func (m *MockCollection) CountDocuments(ctx context.Context, filter any, opts ...*options.CountOptions) (int64, error) <span class="cov0" title="0">{
+func (m *MockCollection) CountDocuments(ctx context.Context, filter any, opts ...*options.CountOptions) (int64, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(int64), args.Error(1)
 }</span>
 
-func (m *MockCollection) Find(ctx context.Context, filter any, opts ...*options.FindOptions) (imongo.Cursor, error) <span class="cov0" title="0">{
+func (m *MockCollection) Find(ctx context.Context, filter any, opts ...*options.FindOptions) (imongo.Cursor, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.Cursor), args.Error(1)
 }</span>
 
-func (m *MockCollection) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) imongo.SingleResult <span class="cov0" title="0">{
+func (m *MockCollection) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) imongo.SingleResult <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.SingleResult)
 }</span>
 
-func (m *MockCollection) UpdateOne(ctx context.Context, filter any, updateDoc any, opts ...*options.UpdateOptions) (imongo.UpdateResult, error) <span class="cov0" title="0">{
+func (m *MockCollection) UpdateOne(ctx context.Context, filter any, updateDoc any, opts ...*options.UpdateOptions) (imongo.UpdateResult, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, filter, updateDoc}, opts)
         args := m.Called(params...)
 
         return args.Get(0).(imongo.UpdateResult), args.Error(1)
 }</span>
 
-func (m *MockCollection) DeleteOne(ctx context.Context, filter any, opts ...*options.DeleteOptions) (imongo.DeleteResult, error) <span class="cov0" title="0">{
+func (m *MockCollection) DeleteOne(ctx context.Context, filter any, opts ...*options.DeleteOptions) (imongo.DeleteResult, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, filter}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.DeleteResult), args.Error(1)
 }</span>
 
-func (m *MockCollection) InsertOne(ctx context.Context, data any, opts ...*options.InsertOneOptions) (imongo.InsertOneResult, error) <span class="cov0" title="0">{
+func (m *MockCollection) InsertOne(ctx context.Context, data any, opts ...*options.InsertOneOptions) (imongo.InsertOneResult, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, data}, opts)
         args := m.Called(params...)
 
         return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
 }</span>
 
-func (m *MockCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (imongo.Cursor, error) <span class="cov0" title="0">{
+func (m *MockCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (imongo.Cursor, error) <span class="cov8" title="1">{
         params := AppendCallArgs([]any{ctx, pipeline}, opts)
         args := m.Called(params...)
         return args.Get(0).(imongo.Cursor), args.Error(1)
@@ -2325,22 +2331,22 @@ type MockCursor struct {
         mock.Mock
 }
 
-func (m *MockCursor) All(ctx context.Context, out interface{}) error <span class="cov0" title="0">{
+func (m *MockCursor) All(ctx context.Context, out interface{}) error <span class="cov8" title="1">{
         args := m.Called(ctx, out)
         return args.Error(0)
 }</span>
 
-func (m *MockCursor) Next(ctx context.Context) bool <span class="cov0" title="0">{
+func (m *MockCursor) Next(ctx context.Context) bool <span class="cov8" title="1">{
         args := m.Called(ctx)
         return args.Bool(0)
 }</span>
 
-func (m *MockCursor) Decode(v interface{}) error <span class="cov0" title="0">{
+func (m *MockCursor) Decode(v interface{}) error <span class="cov8" title="1">{
         args := m.Called(v)
         return args.Error(0)
 }</span>
 
-func (m *MockCursor) Close(ctx context.Context) error <span class="cov0" title="0">{
+func (m *MockCursor) Close(ctx context.Context) error <span class="cov8" title="1">{
         args := m.Called(ctx)
         return args.Error(0)
 }</span>
@@ -2349,7 +2355,7 @@ type MockSingleResult struct {
         mock.Mock
 }
 
-func (m *MockSingleResult) Decode(v any) error <span class="cov0" title="0">{
+func (m *MockSingleResult) Decode(v any) error <span class="cov8" title="1">{
         args := m.Called(v)
         return args.Error(0)
 }</span>
@@ -2359,7 +2365,7 @@ type MockMongoUtils struct {
 }
 
 // CountDocumentWithPipeline implements mongoutils.DocumentCounter.
-func (m *MockMongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator imongo.IAggregate, countPipeline bson.A) (total int64, err error) <span class="cov0" title="0">{
+func (m *MockMongoUtils) CountDocumentWithPipeline(ctx context.Context, aggregator imongo.IAggregate, countPipeline bson.A) (total int64, err error) <span class="cov8" title="1">{
         args := m.Called(ctx, aggregator, countPipeline)
         return args.Get(0).(int64), args.Error(1)
 }</span>
@@ -2369,7 +2375,7 @@ type MockObjectIDCreator struct {
 }
 
 // ObjectIDFromHex implements imongo.IObjectIdCreator.
-func (m *MockObjectIDCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) <span class="cov0" title="0">{
+func (m *MockObjectIDCreator) ObjectIDFromHex(s string) (primitive.ObjectID, error) <span class="cov8" title="1">{
         args := m.Called(s)
         return args.Get(0).(primitive.ObjectID), args.Error(1)
 }</span>
@@ -2384,20 +2390,20 @@ type MockPasswordUtils struct {
 }
 
 // GenerateSalt implements utils.IPasswordUtils.
-func (m *MockPasswordUtils) GenerateSalt(length int) (string, error) <span class="cov0" title="0">{
+func (m *MockPasswordUtils) GenerateSalt(length int) (string, error) <span class="cov8" title="1">{
         args := m.Called(length)
 
         return args.String(0), args.Error(1)
 }</span>
 
 // HashPassword implements utils.IPasswordUtils.
-func (m *MockPasswordUtils) HashPassword(password string, salt string) (string, error) <span class="cov0" title="0">{
+func (m *MockPasswordUtils) HashPassword(password string, salt string) (string, error) <span class="cov8" title="1">{
         args := m.Called(password, salt)
         return args.String(0), args.Error(1)
 }</span>
 
 // VerifyPassword implements utils.IPasswordUtils.
-func (m *MockPasswordUtils) VerifyPassword(hashedPassword string, password string, salt string) bool <span class="cov0" title="0">{
+func (m *MockPasswordUtils) VerifyPassword(hashedPassword string, password string, salt string) bool <span class="cov8" title="1">{
         args := m.Called(hashedPassword, password, salt)
         return args.Bool(0)
 }</span>
