@@ -10,10 +10,10 @@ import (
 )
 
 type AuthRouter struct {
-	authSvc *AuthSvc.AuthService
+	authSvc AuthSvc.IAuthService
 }
 
-func NewAuthRouter(authSvc *AuthSvc.AuthService) *AuthRouter {
+func NewAuthRouter(authSvc AuthSvc.IAuthService) *AuthRouter {
 
 	return &AuthRouter{
 		authSvc: authSvc,
