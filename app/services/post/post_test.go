@@ -102,4 +102,43 @@ func TestPostService_GetPostById_BadId(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestPostService_UpdatePostById(t *testing.T) {
+	repo := new(mockPostRepo)
+	svc := &PostService{postRepo: repo}
+	oid := primitive.NewObjectID()
+	updateData := &PostSchema.PostUpdate{Title: ptr("new")}
+	repo.On("UpdatePostById", mock.Anything, oid, updateData).Return(nil)
+
+	err := svc.UpdatePostById(context.TODO(), oid.Hex(), updateData)
+	assert.NoError(t, err)
+	repo.AssertExpectations(t)
+}
+
+func TestPostService_UpdatePostById_BadId(t *testing.T) {
+	repo := new(mockPostRepo)
+	svc := &PostService{postRepo: repo}
+	err := svc.UpdatePostById(context.TODO(), "bad", &PostSchema.PostUpdate{})
+	assert.Error(t, err)
+	repo.AssertExpectations(t)
+}
+
+func TestPostService_DeletePostById(t *testing.T) {
+	repo := new(mockPostRepo)
+	svc := &PostService{postRepo: repo}
+	oid := primitive.NewObjectID()
+	repo.On("DeletePostById", mock.Anything, oid).Return(nil)
+
+	err := svc.DeletePostById(context.TODO(), oid.Hex())
+	assert.NoError(t, err)
+	repo.AssertExpectations(t)
+}
+
+func TestPostService_DeletePostById_BadId(t *testing.T) {
+	repo := new(mockPostRepo)
+	svc := &PostService{postRepo: repo}
+	err := svc.DeletePostById(context.TODO(), "bad")
+	assert.Error(t, err)
+	repo.AssertExpectations(t)
+}
+
 func ptr(s string) *string { return &s }
