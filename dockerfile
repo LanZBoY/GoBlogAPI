@@ -1,6 +1,7 @@
 FROM golang:alpine AS builder
 WORKDIR /server
 COPY . .
+RUN go test ./...
 RUN go build -o server ./app/main.go
 
 FROM alpine:latest
